@@ -1,13 +1,16 @@
-# Pairwise comparison of genotype means (PBTools: ssa.pairwise), with multcomp: Tukey (all pairs) or Dunnett (against
-# control genotypes), simultaneous confidence intervals at level 1 - alpha on a model with genotype fixed.
-# PBTools lists only the pairs whose interval excludes 0; `all` keeps every pair. Tukey also gives letter groups
-# (multcomp::cld), which PBTools does not.
+# Pairwise comparison of genotype means (PBTools: ssa.pairwise): Tukey (all pairs) or Dunnett (against control
+# genotypes), simultaneous confidence intervals at level 1 - alpha on a model with genotype fixed. A difference is
+# significant when its interval excludes 0; PBTools lists only those pairs (`all` keeps every pair).
+#   method "emmeans" (default, fast): emmeans contrasts, Tukey-Kramer intervals (studentized range) and Dunnett's
+#     intervals ("dunnettx" approximation); identical to the exact intervals for balanced data.
+#   method "multcomp" (as PBTools, slow): multcomp::glht single-step intervals; the critical value comes from the
+#     multivariate t distribution, computed numerically (seconds per environment with 15 genotypes).
+# Tukey also gives letter groups (multcompView::multcompLetters on the significant pairs), which PBTools does not.
 
-pb_pairwise <- function(models, geno, type = c("Tukey", "Dunnett"), alpha = 0.05, control = NULL, all = FALSE, seed = 1) {
-  # multcomp finds the critical value of the simultaneous intervals numerically (randomised); a fixed seed makes the
-  # limits reproducible
-  if (!is.null(seed)) set.seed(seed)
-  type <- match.arg(type)
+pb_pairwise <- function(models, geno, type = c("Tukey", "Dunnett"), alpha = 0.05, control = NULL, all = FALSE,
+                        method = c("emmeans", "multcomp"), seed = 1) {
+  type <- match.arg(type); method <- match.arg(method)
+  if (!is.null(seed)) set.seed(seed)   # the multcomp critical value is randomised; a fixed seed makes it reproducible
   if (!length(models)) stop("There is no model with genotype as a fixed effect. Run the analysis with genotype = Fixed first.", call. = FALSE)
   control <- control[!is.na(control) & nzchar(control)]
   if (type == "Dunnett" && !length(control)) stop("Choose at least one control genotype for Dunnett's test.", call. = FALSE)
@@ -15,33 +18,48 @@ pb_pairwise <- function(models, geno, type = c("Tukey", "Dunnett"), alpha = 0.05
   for (nm in names(models)) {
     m <- models[[nm]]
     lv <- levels(stats::model.frame(m)[[geno]])
-    if (type == "Tukey") {
-      K <- "Tukey"   # character, so that multcomp::cld can give letter groups
-      ctr <- list(K)
-    } else {
+    ctl <- if (type == "Dunnett") {
       ok <- control %in% lv
       if (!all(ok)) warn <- c(warn, sprintf("%s: control(s) not in the data: %s", nm, paste(control[!ok], collapse = ", ")))
-      ctr <- lapply(control[ok], function(cn) multcomp::contrMat(stats::setNames(rep(1, length(lv)), lv), type = "Dunnett", base = match(cn, lv)))
-    }
-    for (K in ctr) {
-      lf <- list(K); names(lf) <- geno
-      gl <- suppressWarnings(multcomp::glht(m, linfct = do.call(multcomp::mcp, lf)))
-      ci <- stats::confint(gl, level = 1 - alpha)$confint
-      pr <- strsplit(rownames(ci), " - ", fixed = TRUE)
-      d <- data.frame(Model = nm, `Genotype i` = vapply(pr, `[`, "", 1), `Genotype j` = vapply(pr, `[`, "", 2),
-                      Difference = ci[, "Estimate"], Lower = ci[, "lwr"], Upper = ci[, "upr"], check.names = FALSE)
+      control[ok]
+    } else NA
+    for (cn in ctl) {
+      d <- if (method == "emmeans") pb_pairs_emmeans(m, geno, type, alpha, cn, lv) else pb_pairs_multcomp(m, geno, type, alpha, cn, lv)
+      d <- cbind(Model = nm, d)
       d$Significant <- d$Lower > 0 | d$Upper < 0
       rows[[length(rows) + 1]] <- d
       if (type == "Tukey") {
-        cl <- multcomp::cld(gl, level = 1 - alpha)
-        letters[[nm]] <- data.frame(Model = nm, Genotype = names(cl$mcletters$Letters), Group = unname(cl$mcletters$Letters))
+        sig <- stats::setNames(d$Significant, paste(match(d$`Genotype i`, lv), match(d$`Genotype j`, lv), sep = "-"))
+        lt <- multcompView::multcompLetters(sig)$Letters
+        letters[[nm]] <- data.frame(Model = nm, Genotype = lv[as.integer(names(lt))], Group = unname(lt))
       }
     }
   }
   tab <- pb_bind(rows)
   if (!all && !is.null(tab)) tab <- tab[tab$Significant, setdiff(names(tab), "Significant"), drop = FALSE]
-  list(table = tab, letters = pb_bind(letters), warning = warn, type = type, alpha = alpha,
+  list(table = tab, letters = pb_bind(letters), warning = warn, type = type, alpha = alpha, method = method,
        none = setdiff(names(models), unique(tab$Model)))
+}
+
+# both helpers return Genotype i, Genotype j, Difference (i - j), Lower, Upper; Dunnett: j is the control
+pb_pairs_emmeans <- function(m, geno, type, alpha, control, lv) {
+  emm <- emmeans::emmeans(m, geno, lmer.df = "asymptotic")
+  ct <- if (type == "Tukey") emmeans::contrast(emm, "revpairwise", adjust = "tukey")
+        else emmeans::contrast(emm, "trt.vs.ctrl", ref = match(control, lv), adjust = "dunnettx")
+  ci <- as.data.frame(stats::confint(ct, level = 1 - alpha, adjust = if (type == "Tukey") "tukey" else "dunnettx"))
+  pr <- strsplit(as.character(ci$contrast), " - ", fixed = TRUE)
+  lo <- grep("LCL$", names(ci), value = TRUE); up <- grep("UCL$", names(ci), value = TRUE)
+  data.frame(`Genotype i` = vapply(pr, `[`, "", 1), `Genotype j` = vapply(pr, `[`, "", 2), Difference = ci$estimate,
+             Lower = ci[[lo]], Upper = ci[[up]], check.names = FALSE)
+}
+pb_pairs_multcomp <- function(m, geno, type, alpha, control, lv) {
+  K <- if (type == "Tukey") "Tukey" else multcomp::contrMat(stats::setNames(rep(1, length(lv)), lv), type = "Dunnett", base = match(control, lv))
+  lf <- list(K); names(lf) <- geno
+  gl <- suppressWarnings(multcomp::glht(m, linfct = do.call(multcomp::mcp, lf)))
+  ci <- stats::confint(gl, level = 1 - alpha)$confint
+  pr <- strsplit(rownames(ci), " - ", fixed = TRUE)
+  data.frame(`Genotype i` = vapply(pr, `[`, "", 1), `Genotype j` = vapply(pr, `[`, "", 2), Difference = ci[, "Estimate"],
+             Lower = ci[, "lwr"], Upper = ci[, "upr"], check.names = FALSE)
 }
 
 # The diagnostic plots PBTools draws (graph.sea.diagplots): residuals against fitted values, normal Q-Q plot and

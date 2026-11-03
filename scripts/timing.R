@@ -1,0 +1,26 @@
+# Time the analyses of the engine on the app examples (native R). Run from the repo root: Rscript scripts/timing.R
+t0 <- Sys.time()
+suppressMessages({ library(lme4); library(emmeans); library(multcomp) })
+cat(sprintf("%-55s %6.2f s\n", "load lme4, emmeans, multcomp", as.numeric(Sys.time() - t0, units = "secs")))
+t0 <- Sys.time(); suppressMessages(library(metan)); cat(sprintf("%-55s %6.2f s\n", "load metan", as.numeric(Sys.time() - t0, units = "secs")))
+for (f in list.files("engine/R", full.names = TRUE)) source(f)
+ex <- "prototype/app/examples"
+tm <- function(label, expr) { t0 <- Sys.time(); r <- force(expr); cat(sprintf("%-55s %6.2f s\n", label, as.numeric(Sys.time() - t0, units = "secs"))); invisible(r) }
+rcb <- read.csv(file.path(ex, "rcb_11sites.csv"))
+tm("SEA RCB 11 sites, fixed", f <- pb_sea(rcb, "Yield", "Genotype", "RCB", "Block", env = "Env"))
+tm("SEA RCB 11 sites, random", pb_sea(rcb, "Yield", "Genotype", "RCB", "Block", env = "Env", random = TRUE))
+tm("Tukey, 11 sites (emmeans, default)", pb_pairwise(f$models, "Genotype", "Tukey"))
+tm("Tukey, 11 sites (multcomp, as PBTools)", pb_pairwise(f$models, "Genotype", "Tukey", method = "multcomp"))
+tm("Dunnett, 11 sites", pb_pairwise(f$models, "Genotype", "Dunnett", control = "GEN1"))
+m <- f$models[[1]]
+tm("  one glht + confint (Tukey, 15 genotypes)", confint(glht(m, linfct = mcp(Genotype = "Tukey"))))
+tm("  emmeans, one site (default Kenward-Roger)", emmeans(m, "Genotype"))
+tm("  emmeans, one site (asymptotic)", emmeans(m, "Genotype", lmer.df = "asymptotic"))
+tm("One-stage, fixed", pb_one_stage(rcb, "Yield", "Genotype", "Env", "RCB", "Block"))
+tm("One-stage, random", pb_one_stage(rcb, "Yield", "Genotype", "Env", "RCB", "Block", random = TRUE))
+tm("Stage 1 + two-stage", pb_two_stage(pb_stage1(rcb, "Yield", "Genotype", "RCB", "Block", env = "Env")))
+tm("Finlay-Wilkinson (metan)", pb_fw(rcb, "Yield", "Genotype", "Env", "Block"))
+tm("Shukla (metan + nlme)", pb_shukla(rcb, "Yield", "Genotype", "Env", "Block"))
+tm("Stability statistics (metan::ge_stats)", pb_stability_stats(rcb, "Yield", "Genotype", "Env", "Block"))
+tm("AMMI (metan)", pb_ammi(rcb, "Yield", "Genotype", "Env", "Block"))
+tm("GGE (metan)", pb_gge(rcb, "Yield", "Genotype", "Env", "Block"))

@@ -6,8 +6,8 @@ The statistics are computed with published R packages instead of PBTools' own fu
 
 | Analysis | Package |
 |---|---|
-| Single environment (7 designs), BLUEs / BLUPs, heritability | lme4, emmeans |
-| Mean comparison (Tukey, Dunnett) | multcomp |
+| Single environment (RCBD in the app; the engine has all 7 PBTools designs), BLUEs / BLUPs, heritability | lme4, emmeans |
+| Mean comparison (Tukey, Dunnett), letter groups | emmeans (default), multcomp (exact, as PBTools), multcompView |
 | Multi-environment, one-stage and two-stage | lme4, emmeans |
 | Finlay-Wilkinson, Shukla, stability indices, AMMI, GGE | metan (and nlme for the PBTools form of Shukla) |
 
@@ -26,7 +26,7 @@ The statistics are computed with published R packages instead of PBTools' own fu
 ## Run and test
 
 ```
-Rscript -e 'install.packages(c("shiny", "bslib", "lme4", "emmeans", "multcomp", "nlme", "metan", "readxl", "writexl", "ggplot2"))'
+Rscript -e 'install.packages(c("shiny", "bslib", "lme4", "emmeans", "multcomp", "multcompView", "nlme", "metan", "readxl", "writexl", "ggplot2"))'
 Rscript scripts/build_app.R
 Rscript prototype/tests/test_server.R
 Rscript -e 'shiny::runApp("prototype/app")'

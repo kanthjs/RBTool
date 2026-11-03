@@ -24,7 +24,7 @@ jobs:
         with:
           use-public-rspm: true
       - name: Install packages
-        run: Rscript -e 'install.packages(c("shiny", "bslib", "shinylive", "lme4", "emmeans", "multcomp", "nlme", "metan", "ggplot2", "readxl", "writexl", "jsonlite", "htmltools"))'
+        run: Rscript -e 'install.packages(c("shiny", "bslib", "shinylive", "lme4", "emmeans", "multcomp", "multcompView", "nlme", "metan", "ggplot2", "readxl", "writexl", "jsonlite", "htmltools"))'
       - name: Copy engine into the app
         run: Rscript scripts/build_app.R
         env:

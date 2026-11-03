@@ -6,7 +6,7 @@ library(shiny)
 
 # Packages used by the engine and the app; this block (never run) lets Shinylive see that they must be bundled
 if (FALSE) {
-  lme4::lmer; emmeans::emmeans; multcomp::glht; nlme::gls; metan::ge_reg
+  lme4::lmer; emmeans::emmeans; multcomp::glht; multcompView::multcompLetters; nlme::gls; metan::ge_reg
   readxl::read_excel; writexl::write_xlsx; ggplot2::ggplot; jsonlite::base64_enc; htmltools::htmlEscape
 }
 engine_dir <- if (dir.exists("engine")) "engine" else file.path("..", "..", "engine", "R")
@@ -27,7 +27,7 @@ home_ui <- div(class = "container", style = "max-width: 1040px;",
   bslib::layout_column_wrap(width = "300px", fill = FALSE, heights_equal = "row",
     home_card("home_sea", "location-dot", "วิเคราะห์สถานที่เดียว",
               "ค่าเฉลี่ยพันธุ์ปรับแล้ว (BLUE) หรือค่าทำนาย (BLUP) องค์ประกอบความแปรปรวน และอัตราพันธุกรรม แยกแต่ละสถานที่",
-              "RCB, alpha-lattice, row-column, augmented, latinized · Tukey, Dunnett"),
+              "RCBD · Tukey, Dunnett, ตัวอักษรกลุ่ม"),
     home_card("home_met", "map-location-dot", "วิเคราะห์หลายสถานที่",
               "รวมหลายสถานที่ในโมเดลเดียว (one-stage) หรือรวมค่าเฉลี่ยของแต่ละสถานที่ (two-stage) ทดสอบปฏิสัมพันธ์พันธุ์ × สถานที่",
               "BLUE / BLUP รวมทุกสถานที่ · heritability · กราฟปฏิสัมพันธ์"),

@@ -16,7 +16,7 @@ testServer(app, {
   n <- 0; go <- function(id, ...) { n <<- n + 1; args <- list(...); args[[id]] <- n; do.call(session$setInputs, args) }
 
   # ---- single environment: RCB, 11 sites ----
-  session$setInputs(sea_src = "ex", sea_example = "rcb11", sea_design = "RCB")
+  session$setInputs(sea_src = "ex", sea_example = "rcb11")
   check(grepl("No results|ยังไม่มีผล", html(output$sea_msg)), "single env: empty state before the first run")
   go("go_sea", sea_trait = "Yield", sea_geno = "Genotype", sea_env = "Env", sea_block = "Block", sea_random = "random")
   r <- rv$sea
@@ -37,14 +37,15 @@ testServer(app, {
   session$setInputs(sea_random = "random")
   check(grepl("settings have changed|การตั้งค่าเปลี่ยนไป", html(output$sea_msg)), "single env: changed settings are flagged")
 
-  # ---- the other designs ----
-  for (k in c("alpha", "rowcol", "augrcb", "augls", "latinrc")) {
-    e <- examples[[k]]
-    session$setInputs(sea_example = k, sea_design = e$design)
-    go("go_sea", sea_trait = e$trait, sea_geno = e$geno, sea_env = e$env %||% "", sea_block = e$block, sea_col = e$column %||% "", sea_rep = e$rep %||% "",
-       sea_random = "random", sea_excl = TRUE)
-    check(is.null(rv$sea_err), paste("single env:", pb_designs[[e$design]], rv$sea_err))
-  }
+  # ---- exact (multcomp) comparisons and a single site ----
+  session$setInputs(sea_example = "rcb2")
+  go("go_sea", sea_trait = c("Y1", "Y2"), sea_geno = "Gen", sea_env = "", sea_block = "Blk", sea_random = "fixed")
+  check(is.null(rv$sea_err) && is.null(rv$sea$summary$Environment) && nrow(rv$sea$summary) == 2, "single env: one site (no environment column), two traits")
+  session$setInputs(sea_pw_type = "Tukey", sea_pw_exact = TRUE, sea_pw_all = TRUE); go("go_sea_pw")
+  check(grepl("Tukey comparisons", html(output$sea_pw_out)), "Tukey with the exact multcomp intervals")
+  t0 <- Sys.time(); session$setInputs(sea_example = "rcb11"); go("go_sea", sea_trait = "Yield", sea_geno = "Genotype", sea_env = "Env", sea_block = "Block", sea_random = "fixed")
+  session$setInputs(sea_pw_exact = FALSE); go("go_sea_pw")
+  check(as.numeric(Sys.time() - t0, units = "secs") < 30, "single env 11 sites + Tukey (emmeans) in under 30 s")
 
   # ---- multi-environment ----
   session$setInputs(met_src = "ex", met_example = "rcb11", met_design = "RCB", met_method = "one")
@@ -60,6 +61,10 @@ testServer(app, {
   go("go_met", met_s1geno = "Genotype", met_s1env = "Env", met_s1mean = "Yield_Mean", met_s1se = "Yield_StdErrMean", met_s1err = "Yield_sigma2", met_s1reps = "Yield_No.rep", met_random = "random")
   check(is.null(rv$met_err) && grepl("1/SE", html(output$met_results)), paste("two-stage from a file of means, weighted", rv$met_err))
   check(grepl("Multi-environment analysis", doc_text(output$dl_met_doc)), "multi-environment: Word report")
+
+  session$setInputs(met_example = "rowcol", met_method = "one", met_design = "RowCol")
+  go("go_met", met_trait = "Y", met_geno = "Geno", met_env = "Env", met_block = "Row", met_col = "Col", met_rep = "Rep", met_random = "random")
+  check(is.null(rv$met_err) && rv$met$info$Genotypes == 25, paste("one-stage row-column example (25 genotypes)", rv$met_err))
 
   # ---- GxE ----
   session$setInputs(gxe_src = "ex", gxe_example = "rcb11", gge_type = "1", gge_scaling = "none", gge_svp = "environment", ammi_type = "2", shukla_pbtools = TRUE)

@@ -16,10 +16,10 @@ method_refs <- c(
 
 methods_ui <- div(class = "container", style = "max-width: 820px;",
   h3("วิธีการและซอฟต์แวร์"),
-  p("แอปนี้ทำการวิเคราะห์ตามเมนู Phenotypic Analysis ของ IRRI PBTools 1.1 โดยคำนวณด้วยแพ็กเกจ R ที่ตีพิมพ์และดูแลอยู่ แทนฟังก์ชันที่ PBTools เขียนเอง ผลทุกส่วนตรวจเทียบกับ PBTools (โค้ดต้นฉบับที่กู้คืนและรันบน R 2.15.1) ด้วยชุดทดสอบ 83 รายการ"),
+  p("แอปนี้ทำการวิเคราะห์ตามเมนู Phenotypic Analysis ของ IRRI PBTools 1.1 โดยคำนวณด้วยแพ็กเกจ R ที่ตีพิมพ์และดูแลอยู่ แทนฟังก์ชันที่ PBTools เขียนเอง ผลทุกส่วนตรวจเทียบกับ PBTools (โค้ดต้นฉบับที่กู้คืนและรันบน R 2.15.1) ด้วยชุดทดสอบ 94 รายการ"),
   uiOutput("methods_versions"),
   h4("Single environment"),
-  p("แต่ละลักษณะในแต่ละสถานที่: linear mixed model (lme4, REML) ที่มีเทอมของแบบแผนการทดลองแบบเดียวกับ PBTools ทั้ง 7 แบบ พันธุ์ fixed: ค่าเฉลี่ยปรับแล้วและ SE จาก emmeans พันธุ์ random: BLUP, likelihood ratio test ของความแปรปรวนทางพันธุกรรม และ heritability = s2g / (s2g + s2e / r) เปรียบเทียบค่าเฉลี่ยด้วย Tukey หรือ Dunnett (multcomp) เหมือน PBTools และเพิ่มตัวอักษรกลุ่ม"),
+  p("แต่ละลักษณะในแต่ละสถานที่ (แบบแผน RCBD): linear mixed model (lme4, REML) ที่มี block เป็น random effect เหมือน PBTools พันธุ์ fixed: ค่าเฉลี่ยปรับแล้วและ SE จาก emmeans พันธุ์ random: BLUP, likelihood ratio test ของความแปรปรวนทางพันธุกรรม และ heritability = s2g / (s2g + s2e / r) เปรียบเทียบค่าเฉลี่ยด้วย Tukey หรือ Dunnett: ค่าเริ่มต้นใช้ emmeans (เร็ว ตรงกับวิธีของ PBTools เมื่อข้อมูลสมดุล) หรือเลือกวิธีแบบ PBTools (multcomp) ได้ และเพิ่มตัวอักษรกลุ่ม (multcompView)"),
   h4("Multi-environment"),
   p("One-stage: ทุกแปลงทุกสถานที่ในโมเดลเดียว สถานที่ บล็อกในสถานที่ และปฏิสัมพันธ์พันธุ์ × สถานที่ เป็น random Two-stage: ค่าเฉลี่ยของพันธุ์ในแต่ละสถานที่ (ขั้นที่ 1) รวมในโมเดลที่สถานที่เป็น random เลือกถ่วงน้ำหนักด้วย 1/SE² ได้"),
   h4("GxE and stability (metan)"),
@@ -29,7 +29,7 @@ methods_ui <- div(class = "container", style = "max-width: 820px;",
     tags$li("Shukla: PBTools ไม่ได้ใช้สูตรของ Shukla (1972) แต่ประมาณส่วนเบี่ยงเบนมาตรฐานของ residual แยกตามพันธุ์ด้วย nlme::gls (REML) แอปแสดงทั้งสองแบบ ลำดับของพันธุ์ใกล้เคียงกันแต่ไม่เท่ากัน"),
     tags$li("Two-stage แบบถ่วงน้ำหนัก 1/SE²: ค่าความแปรปรวนและ SE ใช้ lme4 รุ่นปัจจุบัน ซึ่งต่างจาก PBTools 1.1 (lme4 รุ่นเก่าปรับสเกลน้ำหนักต่างกัน) ค่าเฉลี่ยตรงกัน"),
     tags$li("AMMI: ใช้ข้อมูลรายแปลง ค่า F ของแต่ละ PC จึงใช้ error ของข้อมูลจริง PBTools ใช้ error รวมจากขั้นที่ 1 ค่า F ต่างเล็กน้อย ส่วนร้อยละและคะแนนของ PC ตรงกัน"),
-    tags$li("ช่วงความเชื่อมั่นของ Tukey/Dunnett คำนวณจุดวิกฤตเชิงตัวเลข (multcomp) แอปกำหนด seed ให้ผลซ้ำได้")),
+    tags$li("Tukey/Dunnett: ค่าเริ่มต้นใช้ emmeans (Tukey-Kramer, Dunnett แบบประมาณ) เร็วกว่ามาก ช่วงความเชื่อมั่นต่างจาก multcomp ของ PBTools ไม่เกินราว 1% ในข้อมูลไม่สมดุล วิธี multcomp คำนวณจุดวิกฤตเชิงตัวเลข แอปกำหนด seed ให้ผลซ้ำได้")),
   h4("เอกสารอ้างอิง"), tags$ul(lapply(method_refs, tags$li)))
 
 about_ui <- div(class = "container", style = "max-width: 820px;",

@@ -28,6 +28,8 @@ met_case("One-stage RCB 11 sites, fixed", rcb, "Yield", "Genotype", "Env", "RCB"
 met_case("One-stage RCB 11 sites, random", rcb, "Yield", "Genotype", "Env", "RCB", "Block", random = TRUE)
 met_case("One-stage RCB 2 sites 2 traits, random", multi, c("Y1", "Y2"), "Gen", "Site", "RCB", "Blk", random = TRUE)
 met_case("One-stage row-column 2 envs, fixed", rc, "Y", "Geno", "Env", "RowCol", "Row", "Col", "Rep", random = FALSE)
+rcx <- read.csv("prototype/app/examples/rowcol_2env.csv")
+met_case("One-stage row-column (app example), random", rcx, "Y", "Geno", "Env", "RowCol", "Row", "Col", "Rep", random = TRUE)
 
 two_case <- function(case, weight, random) {
   e <- pb_two_stage(two, "Yield_Mean", "Yield_StdErrMean", "Yield_sigma2", "Yield_No.rep", "Genotype", "Env", weight = weight, random = random)

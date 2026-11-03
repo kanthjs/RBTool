@@ -6,16 +6,8 @@ examples <- list(
                design = "RCB", trait = "Yield", geno = "Genotype", env = "Env", block = "Block", rep = "Block"),
   rcb2 = list(label = "8 genotypes x 2 sites, RCB, two traits (PBTools)", file = "rcb_2sites.csv", pages = c("sea", "met"),
               design = "RCB", trait = c("Y1", "Y2"), geno = "Gen", env = "Site", block = "Blk"),
-  alpha = list(label = "Alpha-lattice: 15 genotypes, 3 reps x 5 blocks (simulated)", file = "alpha_lattice.csv", pages = "sea",
-               design = "Alpha", trait = "Y", geno = "Geno", block = "Block", rep = "Rep"),
-  rowcol = list(label = "Row-column: 16 genotypes, 2 reps, 2 sites (simulated)", file = "rowcol_2env.csv", pages = c("sea", "met"),
+  rowcol = list(label = "Row-column: 25 genotypes, 2 reps, 2 sites (simulated)", file = "rowcol_2env.csv", pages = "met",
                 design = "RowCol", trait = "Y", geno = "Geno", env = "Env", block = "Row", column = "Col", rep = "Rep"),
-  augrcb = list(label = "Augmented RCB: 3 checks + 12 test entries (simulated)", file = "augmented_rcb.csv", pages = "sea",
-                design = "AugRCB", trait = "Y", geno = "Entry", block = "Block"),
-  augls = list(label = "Augmented latin square: 5 checks + 15 test entries (simulated)", file = "augmented_ls.csv", pages = "sea",
-               design = "AugLS", trait = "Y", geno = "Entry", block = "Row", column = "Col"),
-  latinrc = list(label = "Latinized row-column: 16 genotypes, 2 reps (simulated)", file = "latin_rowcol.csv", pages = "sea",
-                 design = "LatinRowCol", trait = "Y", geno = "Geno", block = "Row", column = "Col", rep = "Rep"),
   stage1 = list(label = "Stage-1 means: 15 genotypes x 10 sites (PBTools)", file = "stage1_means.csv", pages = "met",
                 trait = "Yield_Mean", geno = "Genotype", env = "Env", se = "Yield_StdErrMean", error_var = "Yield_sigma2", reps = "Yield_No.rep"))
 examples_for <- function(page) { ex <- Filter(function(e) page %in% e$pages, examples); stats::setNames(names(ex), vapply(ex, `[[`, "", "label")) }

@@ -1,9 +1,8 @@
 # Single-environment screen (server). Sourced inside server().
 
 sea_dat <- data_server(input, "sea")
-observeEvent(input$sea_example, { e <- examples[[input$sea_example]]; if (!is.null(e$design)) updateRadioButtons(session, "sea_design", selected = e$design) })
 
-row_label <- function(design) if (design %in% c("RowCol", "AugLS", "LatinRowCol")) "Row" else "Block (incomplete block in the lattice designs)"
+row_label <- function(design) if (design %in% c("RowCol", "AugLS", "LatinRowCol")) "Row" else if (design %in% c("RCB", "AugRCB")) "Block (replicate)" else "Block (incomplete block)"
 raw_vars_ui <- function(p, dat, design, multi_trait = TRUE, need_env = FALSE) {
   d <- dat$d; cl <- names(d); e <- dat$ex; num <- numeric_like(d)
   tagList(
@@ -15,13 +14,13 @@ raw_vars_ui <- function(p, dat, design, multi_trait = TRUE, need_env = FALSE) {
     if (pb_needs_column(design)) role_select(paste0(p, "_col"), "Column", cl, e$column, "^col"),
     if (pb_needs_rep(design)) role_select(paste0(p, "_rep"), "Replicate", cl, e$rep, "^rep"))
 }
-output$sea_vars <- renderUI(raw_vars_ui("sea", sea_dat(), input$sea_design))
+output$sea_vars <- renderUI(raw_vars_ui("sea", sea_dat(), "RCB"))
 
 observeEvent(input$go_sea, {
   d <- sea_dat()$d
   r <- run_safe(withProgress(message = "Fitting the mixed models", value = 0.4,
-    pb_sea(d, input$sea_trait, input$sea_geno, input$sea_design, input$sea_block, input$sea_col, input$sea_rep, input$sea_env,
-           random = input$sea_random == "random", exclude_check = isTRUE(input$sea_excl))))
+    pb_sea(d, input$sea_trait, input$sea_geno, "RCB", input$sea_block, env = input$sea_env,
+           random = input$sea_random == "random")))
   rv$sea <- r$res; rv$sea_err <- r$err; rv$sea_set <- settings_of("sea"); rv$sea_name <- sea_dat()$name
 })
 output$sea_msg <- msg_ui("sea", "Run single-environment analysis")

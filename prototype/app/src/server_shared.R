@@ -49,7 +49,8 @@ pw_server <- function(p, res_fn, geno_fn) {
   observeEvent(res_fn(), { pw(NULL); pw_err(NULL) })
   observeEvent(input[[paste0("go_", p, "_pw")]], {
     r <- run_safe(withProgress(message = "Comparing means", value = 0.5,
-      pb_pairwise(res_fn()$models, geno_fn(), input[[paste0(p, "_pw_type")]], as.numeric(input[[paste0(p, "_pw_alpha")]]), input[[paste0(p, "_pw_control")]], all = TRUE)))
+      pb_pairwise(res_fn()$models, geno_fn(), input[[paste0(p, "_pw_type")]], as.numeric(input[[paste0(p, "_pw_alpha")]]), input[[paste0(p, "_pw_control")]], all = TRUE,
+                  method = if (isTRUE(input[[paste0(p, "_pw_exact")]])) "multcomp" else "emmeans")))
     pw(r$res); pw_err(r$err)
   })
   output[[paste0(p, "_pw_out")]] <- renderUI({

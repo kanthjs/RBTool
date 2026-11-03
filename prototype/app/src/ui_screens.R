@@ -21,19 +21,22 @@ pw_controls <- function(p) fluidRow(
   column(4, radioButtons(paste0(p, "_pw_type"), "Comparison", c("Tukey: all pairs" = "Tukey", "Dunnett: against a control" = "Dunnett"))),
   column(3, selectInput(paste0(p, "_pw_alpha"), "Significance level", c("0.05" = 0.05, "0.01" = 0.01, "0.10" = 0.10))),
   column(5, conditionalPanel(sprintf("input.%s_pw_type == 'Dunnett'", p), selectizeInput(paste0(p, "_pw_control"), "Control genotype(s)", NULL, multiple = TRUE))),
+  column(12, checkboxInput(paste0(p, "_pw_exact"), "Exact intervals as in PBTools (multcomp single-step; slower, seconds per site)", FALSE)),
   column(12, actionButton(paste0("go_", p, "_pw"), tagList(icon("play"), " Compare means"), class = "btn-primary")))
 pw_help <- help_box("About the comparisons",
   p("Simultaneous confidence intervals of the differences (multcomp), on the model with genotype fixed, as PBTools does: a difference is significant when its interval does not include 0."),
+  p("By default the intervals come from emmeans (Tukey-Kramer, Dunnett): fast, and the same as the exact ones for balanced data; elsewhere within about 1%. Tick the exact option for the multcomp intervals PBTools uses."),
   p("Tukey also gives letter groups: genotypes sharing a letter do not differ significantly. PBTools lists only the significant pairs; tick the box to see every pair."))
 
 sea_ui <- sidebarLayout(
   sidebarPanel(
-    side_step(1, "Experimental design", design_radio("sea_design"), design_help),
-    data_step("sea", "sea", 2),
-    side_step(3, "Variables", uiOutput("sea_vars")),
-    side_step(4, "Genotype effect", effect_radio("sea_random"), effect_help,
-      conditionalPanel("['AugRCB','AugLS'].indexOf(input.sea_design) >= 0 && input.sea_random == 'random'",
-        checkboxInput("sea_excl", "Checks fixed, test entries random (checks: genotypes planted more than once)", TRUE))),
+    side_step(1, "Data", radioButtons("sea_src", NULL, c("Built-in example" = "ex", "Upload file" = "up"), inline = TRUE),
+      conditionalPanel("input.sea_src == 'ex'", selectInput("sea_example", NULL, examples_for("sea"))),
+      conditionalPanel("input.sea_src == 'up'", fileInput("sea_file", "Data file (.csv, .txt, .xlsx)", accept = c(".csv", ".txt", ".tsv", ".xlsx", ".xls"))),
+      help_box("Design and file layout", p("Randomized complete block design (RCBD): every genotype once in each block (replicate)."),
+        p("One row per plot, the first row holds the column names: genotype, block, the environment if the file has several sites, and one column per trait."))),
+    side_step(2, "Variables", uiOutput("sea_vars")),
+    side_step(3, "Genotype effect", effect_radio("sea_random"), effect_help),
     run_bar("go_sea", "Run single-environment analysis")),
   mainPanel(
     uiOutput("sea_msg"),

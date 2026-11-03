@@ -48,14 +48,21 @@ sea_case("Latinized row-column, fixed", rcl, "Y", "Geno", "LatinRowCol", "Row", 
 # ---- pairwise comparisons (multcomp) ----
 e <- pb_sea(rc1, "Y", "Geno", "RowCol", "Row", "Col", "Rep", random = FALSE)
 p <- suppressWarnings(PBToolsRD::pb_ssa(rc1, "Y", "Geno", "RowCol", "Row", "Col", "Rep", random = FALSE))
+k <- function(x) paste(x$`Genotype i`, x$`Genotype j`)
 for (ty in c("Tukey", "Dunnett")) {
-  # multcomp computes the critical value of the intervals numerically (randomised): same seed for both
-  set.seed(1); a <- pb_pairwise(e$models, "Geno", ty, 0.05, control = "G01")$table
+  # method "multcomp" = PBTools: the critical value is computed numerically (randomised), same seed for both
   set.seed(1); b <- suppressWarnings(PBToolsRD::pb_pairwise(p$models, ty, 0.05, control = "G01"))$table
-  k <- function(x) paste(x$`Genotype i`, x$`Genotype j`)
+  a <- pb_pairwise(e$models, "Geno", ty, 0.05, control = "G01", method = "multcomp")$table
   cmp(paste("Pairwise", ty, "(multcomp)"), "same significant pairs", as.numeric(setequal(k(a), k(b))), 1, 0)
   m <- match(k(b), k(a))
   cmp(paste("Pairwise", ty, "(multcomp)"), "difference and interval limits", c(a$Difference[m], a$Lower[m], a$Upper[m]), c(b$Difference, b$Lower, b$Upper), 1e-3)
+  # default method "emmeans" (Tukey-Kramer / dunnettx): same differences; limits within 1% of the exact single-step ones
+  a <- pb_pairwise(e$models, "Geno", ty, 0.05, control = "G01", all = TRUE)$table
+  a <- a[a$Significant, ]; m <- match(k(b), k(a))
+  cmp(paste("Pairwise", ty, "(emmeans, default)"), "significant pairs found by PBTools", as.numeric(!anyNA(m)), 1, 0)
+  cmp(paste("Pairwise", ty, "(emmeans, default)"), "difference", a$Difference[m], b$Difference, 1e-6)
+  cmp(paste("Pairwise", ty, "(emmeans, default)"), "interval half-width (relative to PBTools)",
+      (a$Upper[m] - a$Lower[m]) / (b$Upper - b$Lower), rep(1, nrow(b)), 0.01)
 }
 
 if (file.exists("engine/R/pb_met.R")) source("scripts/compare_engine_met.R")
