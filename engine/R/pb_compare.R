@@ -48,10 +48,10 @@ pb_pairwise <- function(models, geno, type = c("Tukey", "Dunnett"), alpha = 0.05
 # histogram of the residuals, plus a note; the Shapiro-Wilk test of the residuals is added (stats::shapiro.test).
 pb_diag_plot <- function(diag, note = NULL) {
   op <- graphics::par(mfrow = c(2, 2), mar = c(4.2, 4.2, 3.2, 1)); on.exit(graphics::par(op))
-  cc <- grDevices::rgb(0.18, 0.49, 0.2, 0.5)
+  cc <- grDevices::rgb(0.65, 0.11, 0.11, 0.5)
   graphics::plot(diag$Fitted, diag$Residual, pch = 16, cex = 0.8, col = cc, xlab = "Fitted values", ylab = "Residuals", main = "Residuals against fitted values")
   graphics::abline(h = 0, lty = 2, col = "grey50")
-  stats::qqnorm(diag$Residual, pch = 16, cex = 0.8, col = cc, main = "Normal Q-Q plot of residuals"); stats::qqline(diag$Residual, col = "#c0392b")
+  stats::qqnorm(diag$Residual, pch = 16, cex = 0.8, col = cc, main = "Normal Q-Q plot of residuals"); stats::qqline(diag$Residual, col = "grey25")
   graphics::hist(diag$Residual, main = "Histogram of residuals", col = cc, border = "white", xlab = "Residual", ylab = "Frequency")
   graphics::plot(0:1, 0:1, type = "n", axes = FALSE, xlab = "", ylab = "")
   sw <- if (length(diag$Residual) >= 3 && length(diag$Residual) <= 5000) tryCatch(stats::shapiro.test(diag$Residual), error = function(e) NULL)

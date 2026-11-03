@@ -39,13 +39,13 @@ home_ui <- div(class = "container", style = "max-width: 1040px;",
     home_step(1, "เลือกการวิเคราะห์", "จากการ์ดด้านบน หรือเมนูด้านบนของหน้า"),
     home_step(2, "เลือกข้อมูล", "เริ่มด้วยข้อมูลตัวอย่าง หรืออัปโหลด .csv / .xlsx หนึ่งแถวต่อหนึ่งแปลง มีคอลัมน์พันธุ์ สถานที่ บล็อก/ซ้ำ และลักษณะที่วัด"),
     home_step(3, "กด Run แล้วดูผล", "ตาราง กราฟ ตรวจสมมติฐาน และดาวน์โหลด Excel หรือรายงาน Word")),
-  div(class = "alert alert-success d-flex gap-2 align-items-start", icon("lock"),
+  div(class = "alert alert-light border d-flex gap-2 align-items-start", icon("lock"),
       span("ข้อมูลของคุณถูกวิเคราะห์ในเบราว์เซอร์ของคุณเท่านั้น ไม่ได้ถูกส่งไปยังเซิร์ฟเวอร์ใด")))
 
 source("methods.R", local = TRUE)         # methods_ui, about_ui
 
 ui <- bslib::page_navbar(
-  title = tags$span(icon("seedling"), app_name, tags$span(class = "badge bg-light text-success", "beta")), window_title = app_name, id = "nav",
+  title = tags$span(icon("seedling"), app_name, tags$span(class = "badge bg-light text-danger", "beta")), window_title = app_name, id = "nav",
   theme = bslib::bs_theme(version = 5), fillable = FALSE, lang = "th",
   navbar_options = bslib::navbar_options(bg = brand[["main"]], theme = "dark"),
   header = tags$head(tags$script(HTML(copy_js)), tags$script(HTML(stale_js)), tags$style(HTML(app_css)), useBusyIndicators()),
