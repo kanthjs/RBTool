@@ -1,0 +1,21 @@
+## result/1/1/respvar 
+[1] "Yield_Mean"
+## result/1/1/stability 
+      est.
+1   382.99
+2   694.55
+3   955.71
+4   972.18
+5   741.83
+6  1564.25
+7  1055.86
+8   844.70
+9   793.68
+10  731.13
+11  245.77
+12  527.85
+13  435.57
+14  879.55
+15  638.48
+## result/method 
+[1] "Stability Analysis using Shukla's model"

@@ -1,0 +1,129 @@
+## result/output/1/respvar 
+[1] "Y"
+## result/output/1/site/1/env 
+[1] "1"
+## result/output/1/site/1/obsread 
+21
+## result/output/1/site/1/obsused 
+20
+## result/output/1/site/1/numreps 
+1.13924
+## result/output/1/site/1/responseRate 
+0.952381
+## result/output/1/site/1/checkTestWarning 
+[1] "NONE"
+## result/output/1/site/1/lmerRun 
+[1] "NO ERROR"
+## result/output/1/site/1/formula1 
+[1] "Y ~ 1 + (1|Block) + (1|Entry)"
+## result/output/1/site/1/model (model skipped)
+## result/output/1/site/1/varcomp.table 
+    Groups   Variance  Std.Dev.
+1    Entry 2.56258797 1.6008085
+2    Block 1.39024186 1.1790852
+3 Residual 0.07030274 0.2651466
+## result/output/1/site/1/varcompnRep 
+    Y_sigma2 Y_No.rep EnvLevel
+1 0.07030274 1.139241        1
+## result/output/1/site/1/formula2 
+[1] "Y ~ 1 + (1|Block)"
+## result/output/1/site/1/models.table 
+            AIC      BIC    logLik   Chisq Df Pr(>Chisq)
+Model2 85.95840 88.94560 -39.97920                      
+Model1 75.63989 79.62282 -33.81995 12.3185  1     0.0004
+## result/output/1/site/1/model1 (model skipped)
+## result/output/1/site/1/heritability 
+0.98
+## result/output/1/site/1/summary.statistic 
+   Entry    Means
+1    CK1 42.22473
+2    CK2 41.17105
+3    CK3 38.68477
+4    T01 37.75906
+5    T02 39.80007
+6    T03 41.65517
+7    T04 40.78796
+8    T05 38.25995
+9    T06 38.16262
+10   T07 41.27328
+11   T08 41.92831
+12   T09 39.87822
+13   T10 38.81148
+14   T11 38.52825
+15   T12 41.74403
+## result/output/1/site/1/sum.out 
+   Entry Y_PredMean EnvLevel
+1    CK1   42.22473        1
+2    CK2   41.17105        1
+3    CK3   38.68477        1
+4    T01   37.75906        1
+5    T02   39.80007        1
+6    T03   41.65517        1
+7    T04   40.78796        1
+8    T05   38.25995        1
+9    T06   38.16262        1
+10   T07   41.27328        1
+11   T08   41.92831        1
+12   T09   39.87822        1
+13   T10   38.81148        1
+14   T11   38.52825        1
+15   T12   41.74403        1
+## result/output/1/site/1/residuals 
+-0.0343373 0.156338 -0.147376 0.167301 -0.189737 -0.0731538 -0.125478 0.299807 -0.062667 
+-0.00667349 0.04422 0.0204288 -0.0489169 -0.0515871 0.0337516 0.0517219 -0.00464313 -0.0339082 
+-0.0416784 0.0465441
+## result/output/1/site/1/fitted.values 
+41.6253 40.5717 38.0854 41.4787 37.9387 43.5702 42.5165 40.0302 37.1597 39.2007 41.0558 40.1886 
+37.5139 37.4166 40.5272 41.1823 41.2236 40.1569 39.8737 43.0895
+## result/output/1/site/1/data (data skipped)
+## result/output/1/site/1/newExcludeCheck 
+[1] FALSE
+## result/output/1/out.sigma2 
+    Y_sigma2 Y_No.rep EnvLevel
+1 0.07030274 1.139241        1
+## result/output/1/means.out 
+   Entry Y_PredMean EnvLevel
+1    CK1   42.22473        1
+2    CK2   41.17105        1
+3    CK3   38.68477        1
+4    T01   37.75906        1
+5    T02   39.80007        1
+6    T03   41.65517        1
+7    T04   40.78796        1
+8    T05   38.25995        1
+9    T06   38.16262        1
+10   T07   41.27328        1
+11   T08   41.92831        1
+12   T09   39.87822        1
+13   T10   38.81148        1
+14   T11   38.52825        1
+15   T12   41.74403        1
+## result/means 
+   Entry Y_PredMean EnvLevel
+1    CK1   42.22473        1
+2    CK2   41.17105        1
+3    CK3   38.68477        1
+4    T01   37.75906        1
+5    T02   39.80007        1
+6    T03   41.65517        1
+7    T04   40.78796        1
+8    T05   38.25995        1
+9    T06   38.16262        1
+10   T07   41.27328        1
+11   T08   41.92831        1
+12   T09   39.87822        1
+13   T10   38.81148        1
+14   T11   38.52825        1
+15   T12   41.74403        1
+## result/meansWarning 
+[1] "not empty"
+## result/meansse NULL
+## result/meansseWarning 
+[1] "empty"
+## result/varrep 
+    Y_sigma2 Y_No.rep EnvLevel
+1 0.07030274 1.139241        1
+## result/varrepWarning 
+[1] "not empty"
+## result/byVars 
+[1] "EnvLevel" "Entry"    "Block"   

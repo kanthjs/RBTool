@@ -1,0 +1,16 @@
+# Write the example data files of the app (prototype/app/examples). Run from the repo root.
+out <- "prototype/app/examples"; dir.create(out, showWarnings = FALSE, recursive = TRUE)
+w <- function(d, f) utils::write.csv(d, file.path(out, f), row.names = FALSE)
+# PBTools example data (IRRI): 15 genotypes x 11 sites, RCB with 3 blocks; 8 genotypes x 2 sites, 2 traits
+w(read.csv("reference/data/RCB_ME.csv"), "rcb_11sites.csv")
+w(read.csv("reference/pbtools-port/inst/extdata/RCB_Multi.csv"), "rcb_2sites.csv")
+w(read.csv("reference/pbtools-port/inst/extdata/Two_stage.csv"), "stage1_means.csv")
+# synthetic layouts of scripts/designs_cases.R (deterministic, no random numbers)
+src <- readLines("scripts/designs_cases.R")
+e <- new.env()
+eval(parse(text = src[grep("^aug <- rbind", src):(grep("^# ---- dump ----", src) - 1)]), e)
+w(e$aug, "augmented_rcb.csv"); w(e$augls, "augmented_ls.csv")
+w(e$rc[, c("Env", "Rep", "Row", "Col", "Geno", "Y")], "rowcol_2env.csv")
+x <- e$al[, c("Rep", "Row", "plot", "Geno", "Y")]; names(x) <- c("Rep", "Block", "Plot", "Geno", "Y"); w(x, "alpha_lattice.csv")
+w(e$rcl[, c("Rep", "Row", "Col", "Geno", "Y")], "latin_rowcol.csv")
+cat("examples written to", out, "\n")

@@ -1,0 +1,3 @@
+.__NAMESPACE__.
+.__S3MethodsTable__.
+.packageName

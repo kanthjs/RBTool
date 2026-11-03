@@ -1,0 +1,159 @@
+## result/output/1/respvar 
+[1] "Y"
+## result/output/1/site/1/env 
+[1] "1"
+## result/output/1/site/1/obsread 
+21
+## result/output/1/site/1/obsused 
+20
+## result/output/1/site/1/numreps 
+1.13924
+## result/output/1/site/1/responseRate 
+0.952381
+## result/output/1/site/1/checkTestWarning 
+[1] "NONE"
+## result/output/1/site/1/lmerRun 
+[1] "NO ERROR"
+## result/output/1/site/1/formula1 
+[1] "Y ~ 1 + Entry + (1|Block)"
+## result/output/1/site/1/model (model skipped)
+## result/output/1/site/1/varcomp.table 
+    Groups   Variance  Std.Dev.
+1    Block 1.39601439 1.1815305
+2 Residual 0.07219955 0.2686997
+## result/output/1/site/1/varcompnRep 
+    Y_sigma2 Y_No.rep EnvLevel
+1 0.07219955 1.139241        1
+## result/output/1/site/1/formula2 
+[1] "Y ~ 1 + (1|Block)"
+## result/output/1/site/1/summary.statistic 
+   Entry   LSMean StdErrMean
+1    CK1 42.24467  0.6995596
+2    CK2 41.18859  0.7122373
+3    CK3 38.67233  0.6995596
+4    T01 37.70275  0.7451248
+5    T02 39.79975  0.7451248
+6    T03 41.70575  0.7451248
+7    T04 40.81475  0.7451248
+8    T05 38.20682  0.7489837
+9    T06 38.10682  0.7489837
+10   T07 41.30282  0.7489837
+11   T08 41.97582  0.7489837
+12   T09 39.87143  0.7451248
+13   T10 38.77543  0.7451248
+14   T11 38.48443  0.7451248
+15   T12 41.78843  0.7451248
+## result/output/1/site/1/sedTable 
+           Estimate
+ Minimum   0.2194  
+ Average   0.3977  
+ Maximum   0.4572  
+## result/output/1/site/1/sum.out 
+   Entry   Y_Mean Y_StdErrMean EnvLevel
+1    CK1 42.24467    0.6995596        1
+2    CK2 41.18859    0.7122373        1
+3    CK3 38.67233    0.6995596        1
+4    T01 37.70275    0.7451248        1
+5    T02 39.79975    0.7451248        1
+6    T03 41.70575    0.7451248        1
+7    T04 40.81475    0.7451248        1
+8    T05 38.20682    0.7489837        1
+9    T06 38.10682    0.7489837        1
+10   T07 41.30282    0.7489837        1
+11   T08 41.97582    0.7489837        1
+12   T09 39.87143    0.7451248        1
+13   T10 38.77543    0.7451248        1
+14   T11 38.48443    0.7451248        1
+15   T12 41.78843    0.7451248        1
+## result/output/1/site/1/residuals 
+-0.0478967 0.145178 -0.128563 0.143169 -0.181497 -0.0952725 -0.145198 0.310061 1.60514e-05 
+1.60514e-05 1.60514e-05 1.60514e-05 1.96569e-05 1.96569e-05 1.96569e-05 1.96569e-05 -3.57083e-05 
+-3.57083e-05 -3.57083e-05 -3.57083e-05
+## result/output/1/site/1/fitted.values 
+41.6389 40.5828 38.0666 41.5028 37.9305 43.5923 42.5362 40.0199 37.097 39.194 41.1 40.209 37.465 
+37.365 40.561 41.234 41.219 40.123 39.832 43.136
+## result/output/1/site/1/data (data skipped)
+## result/output/1/site/1/newExcludeCheck 
+[1] FALSE
+## result/output/1/out.sigma2 
+    Y_sigma2 Y_No.rep EnvLevel
+1 0.07219955 1.139241        1
+## result/output/1/meansse.out 
+   Entry   Y_Mean Y_StdErrMean EnvLevel
+1    CK1 42.24467    0.6995596        1
+2    CK2 41.18859    0.7122373        1
+3    CK3 38.67233    0.6995596        1
+4    T01 37.70275    0.7451248        1
+5    T02 39.79975    0.7451248        1
+6    T03 41.70575    0.7451248        1
+7    T04 40.81475    0.7451248        1
+8    T05 38.20682    0.7489837        1
+9    T06 38.10682    0.7489837        1
+10   T07 41.30282    0.7489837        1
+11   T08 41.97582    0.7489837        1
+12   T09 39.87143    0.7451248        1
+13   T10 38.77543    0.7451248        1
+14   T11 38.48443    0.7451248        1
+15   T12 41.78843    0.7451248        1
+## result/output/1/means.out 
+   Entry   Y_Mean EnvLevel
+1    CK1 42.24467        1
+2    CK2 41.18859        1
+3    CK3 38.67233        1
+4    T01 37.70275        1
+5    T02 39.79975        1
+6    T03 41.70575        1
+7    T04 40.81475        1
+8    T05 38.20682        1
+9    T06 38.10682        1
+10   T07 41.30282        1
+11   T08 41.97582        1
+12   T09 39.87143        1
+13   T10 38.77543        1
+14   T11 38.48443        1
+15   T12 41.78843        1
+## result/means 
+   Entry   Y_Mean EnvLevel
+1    CK1 42.24467        1
+2    CK2 41.18859        1
+3    CK3 38.67233        1
+4    T01 37.70275        1
+5    T02 39.79975        1
+6    T03 41.70575        1
+7    T04 40.81475        1
+8    T05 38.20682        1
+9    T06 38.10682        1
+10   T07 41.30282        1
+11   T08 41.97582        1
+12   T09 39.87143        1
+13   T10 38.77543        1
+14   T11 38.48443        1
+15   T12 41.78843        1
+## result/meansWarning 
+[1] "not empty"
+## result/meansse 
+   Entry   Y_Mean Y_StdErrMean EnvLevel
+1    CK1 42.24467    0.6995596        1
+2    CK2 41.18859    0.7122373        1
+3    CK3 38.67233    0.6995596        1
+4    T01 37.70275    0.7451248        1
+5    T02 39.79975    0.7451248        1
+6    T03 41.70575    0.7451248        1
+7    T04 40.81475    0.7451248        1
+8    T05 38.20682    0.7489837        1
+9    T06 38.10682    0.7489837        1
+10   T07 41.30282    0.7489837        1
+11   T08 41.97582    0.7489837        1
+12   T09 39.87143    0.7451248        1
+13   T10 38.77543    0.7451248        1
+14   T11 38.48443    0.7451248        1
+15   T12 41.78843    0.7451248        1
+## result/meansseWarning 
+[1] "not empty"
+## result/varrep 
+    Y_sigma2 Y_No.rep EnvLevel
+1 0.07219955 1.139241        1
+## result/varrepWarning 
+[1] "not empty"
+## result/byVars 
+[1] "EnvLevel" "Entry"    "Block"   

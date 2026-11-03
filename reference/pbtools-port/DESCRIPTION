@@ -1,0 +1,9 @@
+Package: PBToolsRD
+Type: Package
+Title: Port of the IRRI PBTools Statistics Engine to Modern R
+Version: 0.0.1
+Description: Single-environment analysis (ssa.test) ported from PBTools 1.1 (R 2.15.1) to R >= 4.0, checked against the original output.
+Depends: R (>= 4.0)
+Imports: lme4, multcomp, doBy, stats, utils, graphics, grDevices
+License: GPL (>= 2)
+Encoding: UTF-8

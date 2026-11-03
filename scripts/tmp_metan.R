@@ -1,0 +1,12 @@
+suppressMessages(library(metan))
+rcb <- read.csv("reference/data/RCB_ME.csv"); rcb$Block <- factor(rcb$Block)
+r <- ge_reg(rcb, Env, Genotype, Block, Yield, verbose = FALSE)$Yield
+cat("ge_reg:", names(r), "\n"); print(head(r$regression, 2)); print(r$anova)
+s <- Shukla(rcb, Env, Genotype, Block, Yield, verbose = FALSE)$Yield; print(head(s, 2))
+st <- ge_stats(rcb, Env, Genotype, Block, Yield, verbose = FALSE)$Yield; cat("ge_stats cols:", names(st), "\n")
+a <- performs_ammi(rcb, Env, Genotype, Block, Yield, verbose = FALSE)$Yield; cat("ammi:", names(a), "\n"); print(head(a$PCA, 3)); print(head(a$model, 3))
+g <- gge(rcb, Env, Genotype, Yield); cat("gge:", names(g$Yield), "\n")
+e <- ecovalence(rcb, Env, Genotype, Block, Yield, verbose = FALSE)$Yield; print(head(e, 2))
+an <- Annicchiarico(rcb, Env, Genotype, Block, Yield, verbose = FALSE)$Yield; cat("Annicchiarico:", names(an), "\n"); print(head(an$general, 2))
+sp <- superiority(rcb, Env, Genotype, Yield, verbose = FALSE)$Yield; cat("superiority:", names(sp), "\n"); print(head(sp$index, 2))
+cat("metan", as.character(packageVersion("metan")), "\n")

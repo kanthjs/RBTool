@@ -1,0 +1,14 @@
+# local outputs
+*.log
+nul
+_site/
+prototype/site/
+prototype/app/engine/
+prototype/app/VERSION
+_problems/
+testthat-problems.rds
+# written by the original PBTools AMMI/GGE functions when the port checks run
+AMMI_PC_scores_*.csv
+GGE_PC_scores_*.csv
+# decompiler binary (download it again, see PORTING.md)
+reference/tools/*.jar

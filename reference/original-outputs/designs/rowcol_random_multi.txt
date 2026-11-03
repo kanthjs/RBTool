@@ -1,0 +1,255 @@
+## result/output/1/respvar 
+[1] "Y"
+## result/output/1/site/1/env 
+[1] "E1"
+## result/output/1/site/1/obsread 
+32
+## result/output/1/site/1/obsused 
+32
+## result/output/1/site/1/numreps 
+1.71429
+## result/output/1/site/1/responseRate 
+1
+## result/output/1/site/1/checkTestWarning 
+[1] "NONE"
+## result/output/1/site/1/lmerRun 
+[1] "NO ERROR"
+## result/output/1/site/1/formula1 
+[1] "Y ~ 1 + (1|Rep) + (1|Rep:Row) + (1|Rep:Col) + (1|Geno)"
+## result/output/1/site/1/model (model skipped)
+## result/output/1/site/1/varcomp.table 
+    Groups Variance Std.Dev.
+1     Geno 8.070923 2.840937
+2  Rep:Col 0.000000 0.000000
+3  Rep:Row 2.265382 1.505119
+4      Rep 0.000000 0.000000
+5 Residual 1.255042 1.120287
+## result/output/1/site/1/varcompnRep 
+  Y_sigma2 Y_No.rep Env
+1 1.255042 1.714286  E1
+## result/output/1/site/1/formula2 
+[1] "Y ~ 1 + (1|Rep) + (1|Rep:Row) + (1|Rep:Col)"
+## result/output/1/site/1/models.table 
+            AIC      BIC    logLik   Chisq Df Pr(>Chisq)
+Model2 171.8279 179.1566 -80.91394                      
+Model1 160.4330 169.2274 -74.21652 13.3948  1     0.0003
+## result/output/1/site/1/model1 (model skipped)
+## result/output/1/site/1/heritability 
+0.92
+## result/output/1/site/1/summary.statistic 
+   Geno    Means
+1   G01 63.18865
+2   G02 57.72927
+3   G03 57.98876
+4   G04 63.66695
+5   G05 60.09702
+6   G06 57.64427
+7   G07 62.23024
+8   G08 62.81186
+9   G09 56.56314
+10  G10 62.16887
+11  G11 64.66991
+12  G12 57.53636
+13  G13 59.59130
+14  G14 63.57161
+15  G15 60.13171
+16  G16 58.21127
+## result/output/1/site/1/sum.out 
+   Geno Y_PredMean Env
+1   G01   63.18865  E1
+2   G02   57.72927  E1
+3   G03   57.98876  E1
+4   G04   63.66695  E1
+5   G05   60.09702  E1
+6   G06   57.64427  E1
+7   G07   62.23024  E1
+8   G08   62.81186  E1
+9   G09   56.56314  E1
+10  G10   62.16887  E1
+11  G11   64.66991  E1
+12  G12   57.53636  E1
+13  G13   59.59130  E1
+14  G14   63.57161  E1
+15  G15   60.13171  E1
+16  G16   58.21127  E1
+## result/output/1/site/1/residuals 
+0.990194 -1.78842 0.344084 -0.421103 -0.0607315 -0.42298 -0.529947 0.36143 -0.304869 -0.103605 
+0.65036 -0.38109 0.689003 0.141694 0.184592 -0.353969 0.0139698 0.744686 0.365049 -0.828376 
+-1.11736 0.890419 -0.23993 1.3595 0.337877 -0.570172 0.901531 0.0562468 -0.732652 -0.019157 
+0.811975 -0.968246
+## result/output/1/site/1/fitted.values 
+61.6088 56.1494 56.4089 62.0871 58.9197 56.467 61.0529 61.6346 56.3119 61.9176 64.4186 57.2851 
+60.785 64.7653 61.3254 59.405 64.2 62.7633 62.702 60.1244 58.1744 59.1476 61.7429 59.3405 64.8811 
+64.4982 64.9765 63.5398 56.3497 56.0052 54.924 55.8972
+## result/output/1/site/1/data (data skipped)
+## result/output/1/site/1/newExcludeCheck 
+[1] FALSE
+## result/output/1/site/2/env 
+[1] "E2"
+## result/output/1/site/2/obsread 
+32
+## result/output/1/site/2/obsused 
+32
+## result/output/1/site/2/numreps 
+1.71429
+## result/output/1/site/2/responseRate 
+1
+## result/output/1/site/2/checkTestWarning 
+[1] "NONE"
+## result/output/1/site/2/lmerRun 
+[1] "NO ERROR"
+## result/output/1/site/2/formula1 
+[1] "Y ~ 1 + (1|Rep) + (1|Rep:Row) + (1|Rep:Col) + (1|Geno)"
+## result/output/1/site/2/model (model skipped)
+## result/output/1/site/2/varcomp.table 
+    Groups     Variance     Std.Dev.
+1     Geno 1.606075e+01 4.007586e+00
+2  Rep:Col 0.000000e+00 0.000000e+00
+3  Rep:Row 2.550767e+00 1.597112e+00
+4      Rep 6.572650e-10 2.563718e-05
+5 Residual 1.570337e+00 1.253131e+00
+## result/output/1/site/2/varcompnRep 
+  Y_sigma2 Y_No.rep Env
+1 1.570337 1.714286  E2
+## result/output/1/site/2/formula2 
+[1] "Y ~ 1 + (1|Rep) + (1|Rep:Row) + (1|Rep:Col)"
+## result/output/1/site/2/models.table 
+            AIC      BIC    logLik   Chisq Df Pr(>Chisq)
+Model2 190.8797 198.2083 -90.43983                      
+Model1 173.1442 181.9386 -80.57210 19.7355  1     0.0000
+## result/output/1/site/2/model1 (model skipped)
+## result/output/1/site/2/heritability 
+0.95
+## result/output/1/site/2/summary.statistic 
+   Geno    Means
+1   G01 71.17491
+2   G02 62.22569
+3   G03 60.80161
+4   G04 68.24740
+5   G05 66.68232
+6   G06 65.90065
+7   G07 70.66644
+8   G08 68.65266
+9   G09 59.45107
+10  G10 66.08224
+11  G11 71.42039
+12  G12 65.64035
+13  G13 68.18965
+14  G14 70.49697
+15  G15 64.00179
+16  G16 61.36084
+## result/output/1/site/2/sum.out 
+   Geno Y_PredMean Env
+1   G01   71.17491  E2
+2   G02   62.22569  E2
+3   G03   60.80161  E2
+4   G04   68.24740  E2
+5   G05   66.68232  E2
+6   G06   65.90065  E2
+7   G07   70.66644  E2
+8   G08   68.65266  E2
+9   G09   59.45107  E2
+10  G10   66.08224  E2
+11  G11   71.42039  E2
+12  G12   65.64035  E2
+13  G13   68.18965  E2
+14  G14   70.49697  E2
+15  G15   64.00179  E2
+16  G16   61.36084  E2
+## result/output/1/site/2/residuals 
+1.05796 -1.92382 0.409259 -0.622531 0.0361885 -0.249146 -0.706935 0.228839 -0.246226 -0.273398 
+0.499453 -0.183508 0.948067 0.104744 0.173931 -0.484118 -0.096248 0.931715 0.250915 -0.764498 
+-1.19411 1.16061 -0.39983 1.52426 0.304423 -0.582511 0.907995 0.200958 -0.948054 0.208909 0.769492 
+-1.04279
+## result/output/1/site/2/fitted.values 
+69.422 60.4728 59.0487 66.4945 65.5598 64.7781 69.5439 67.5302 59.1202 65.7514 71.0895 65.3095 
+69.3959 71.7033 65.2081 62.5671 68.7702 71.1893 66.6051 68.7125 61.2231 67.4124 65.7738 63.9977 
+71.8466 72.5245 69.597 72.016 59.1571 64.2561 57.8065 63.9958
+## result/output/1/site/2/data (data skipped)
+## result/output/1/site/2/newExcludeCheck 
+[1] FALSE
+## result/output/1/out.sigma2 
+  Y_sigma2 Y_No.rep Env
+1 1.255042 1.714286  E1
+2 1.570337 1.714286  E2
+## result/output/1/means.out 
+   Geno Y_PredMean Env
+1   G01   63.18865  E1
+2   G02   57.72927  E1
+3   G03   57.98876  E1
+4   G04   63.66695  E1
+5   G05   60.09702  E1
+6   G06   57.64427  E1
+7   G07   62.23024  E1
+8   G08   62.81186  E1
+9   G09   56.56314  E1
+10  G10   62.16887  E1
+11  G11   64.66991  E1
+12  G12   57.53636  E1
+13  G13   59.59130  E1
+14  G14   63.57161  E1
+15  G15   60.13171  E1
+16  G16   58.21127  E1
+17  G01   71.17491  E2
+18  G02   62.22569  E2
+19  G03   60.80161  E2
+20  G04   68.24740  E2
+21  G05   66.68232  E2
+22  G06   65.90065  E2
+23  G07   70.66644  E2
+24  G08   68.65266  E2
+25  G09   59.45107  E2
+26  G10   66.08224  E2
+27  G11   71.42039  E2
+28  G12   65.64035  E2
+29  G13   68.18965  E2
+30  G14   70.49697  E2
+31  G15   64.00179  E2
+32  G16   61.36084  E2
+## result/means 
+   Geno Y_PredMean Env
+1   G01   63.18865  E1
+2   G02   57.72927  E1
+3   G03   57.98876  E1
+4   G04   63.66695  E1
+5   G05   60.09702  E1
+6   G06   57.64427  E1
+7   G07   62.23024  E1
+8   G08   62.81186  E1
+9   G09   56.56314  E1
+10  G10   62.16887  E1
+11  G11   64.66991  E1
+12  G12   57.53636  E1
+13  G13   59.59130  E1
+14  G14   63.57161  E1
+15  G15   60.13171  E1
+16  G16   58.21127  E1
+17  G01   71.17491  E2
+18  G02   62.22569  E2
+19  G03   60.80161  E2
+20  G04   68.24740  E2
+21  G05   66.68232  E2
+22  G06   65.90065  E2
+23  G07   70.66644  E2
+24  G08   68.65266  E2
+25  G09   59.45107  E2
+26  G10   66.08224  E2
+27  G11   71.42039  E2
+28  G12   65.64035  E2
+29  G13   68.18965  E2
+30  G14   70.49697  E2
+31  G15   64.00179  E2
+32  G16   61.36084  E2
+## result/meansWarning 
+[1] "not empty"
+## result/meansse NULL
+## result/meansseWarning 
+[1] "empty"
+## result/varrep 
+  Y_sigma2 Y_No.rep Env
+1 1.255042 1.714286  E1
+2 1.570337 1.714286  E2
+## result/varrepWarning 
+[1] "not empty"
+## result/byVars 
+[1] "Env"  "Geno" "Row"  "Col"  "Rep" 

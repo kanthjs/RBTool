@@ -1,0 +1,208 @@
+`GETwoStage.test.default` <-
+function (data, respvar, stderr = NULL, sigma2, numrep, geno, 
+    env, weight = c("none", "stderr", "stdmean"), is.genoRandom = FALSE) 
+{
+    library(lme4)
+    options(show.signif.stars = FALSE)
+    respvar <- trimStrings(respvar)
+    if (!is.null(stderr)) {
+        stderr <- trimStrings(stderr)
+    }
+    sigma2 <- trimStrings(sigma2)
+    numrep <- trimStrings(numrep)
+    geno <- trimStrings(geno)
+    env <- trimStrings(env)
+    if (is.na(match(respvar, names(data))) || is.na(match(sigma2, 
+        names(data))) || is.na(match(numrep, names(data))) || 
+        is.na(match(geno, names(data))) || is.na(match(env, names(data)))) {
+        stop("At least one variable name does not match a column in the data frame.")
+    }
+    weight <- match.arg(weight)
+    data[, match(geno, names(data))] <- factor(data[, match(geno, 
+        names(data))])
+    data[, match(env, names(data))] <- factor(data[, match(env, 
+        names(data))])
+    result <- list()
+    for (i in (1:length(respvar))) {
+        temp.data <- subset(data, subset = (is.na(data[, match(respvar[i], 
+            names(data))]) == F))
+        if (weight == "stderr") {
+            temp.data$computedWeight <- 1/(temp.data[, match(stderr[i], 
+                names(temp.data))]^2)
+        }
+        else {
+            temp.data$computedWeight <- NULL
+        }
+        result[[i]] <- list()
+        result[[i]]$respvar <- respvar[i]
+        obsread <- nrow(data)
+        obsused <- nrow(temp.data)
+        responseRate <- obsused/obsread
+        result[[i]]$obsread <- obsread
+        result[[i]]$obsused <- obsused
+        result[[i]]$responseRate <- responseRate
+        if (responseRate < 0.8) {
+            result[[i]]$manyNAWarning <- "Too many missing observations. Cannot proceed with the analysis."
+            next
+        }
+        else {
+            temp.data[, match(geno, names(temp.data))] <- factor(trimStrings(temp.data[, 
+                match(geno, names(temp.data))]))
+            temp.data[, match(env, names(temp.data))] <- factor(trimStrings(temp.data[, 
+                match(env, names(temp.data))]))
+            levelsGeno <- levels(temp.data[, match(geno, names(temp.data))])
+            levelsEnv <- levels(temp.data[, match(env, names(temp.data))])
+            result[[i]]$nlevelsGeno <- length(levelsGeno)
+            result[[i]]$nlevelsEnv <- length(levelsEnv)
+            if (max(nchar(levelsGeno)) > 4 || max(nchar(levelsEnv)) > 
+                4) {
+                newCodingGeno <- data.frame(Genotype = levelsGeno, 
+                  Code = paste("G", seq(1:length(levelsGeno)), 
+                    sep = ""))
+                newCodingEnv <- data.frame(Environment = levelsEnv, 
+                  Code = paste("E", seq(1:length(levelsEnv)), 
+                    sep = ""))
+                result[[i]]$newCodingGeno <- newCodingGeno
+                result[[i]]$newCodingEnv <- newCodingEnv
+                recodedLevels <- TRUE
+                result[[i]]$recodedLevels <- recodedLevels
+                temp.data$CodedGeno <- newCodingGeno$Code[match(temp.data[, 
+                  geno], newCodingGeno$Genotype)]
+                temp.data$CodedEnv <- newCodingEnv$Code[match(temp.data[, 
+                  env], newCodingEnv$Environment)]
+            }
+            else {
+                temp.data$CodedGeno <- temp.data[, match(geno, 
+                  names(temp.data))]
+                temp.data$CodedEnv <- temp.data[, match(env, 
+                  names(temp.data))]
+                recodedLevels <- FALSE
+                result[[i]]$recodedLevels <- recodedLevels
+            }
+            if (is.genoRandom) {
+                trt.stmt <- paste("(1|", geno, ")", sep = "")
+            }
+            else {
+                trt.stmt <- paste(geno, sep = "")
+            }
+            myformula1 <- paste(respvar[i], " ~ 1 + ", trt.stmt, 
+                " + (1|", env, ")", sep = "")
+            model <- lmer(formula(myformula1), weights = temp.data$computedWeight, 
+                data = temp.data)
+            result[[i]]$formula1 <- myformula1
+            result[[i]]$model <- model
+            sumStat.Env <- data.frame(tapply(temp.data[, match(respvar[i], 
+                names(temp.data))], temp.data[, match(env, names(temp.data))], 
+                mean))
+            sumStat.Env <- data.frame(rownames(sumStat.Env), 
+                sumStat.Env)
+            colnames(sumStat.Env) <- c(env, "means")
+            rownames(sumStat.Env) <- NULL
+            numRep <- 1/mean(1/tapply(temp.data[, match(numrep[i], 
+                names(temp.data))], temp.data[, match(env, names(temp.data))], 
+                mean))
+            numEnv <- nlevels(temp.data[, match(env, names(temp.data))])
+            error.variance <- sum(tapply(temp.data[, match(sigma2[i], 
+                names(temp.data))], temp.data[, match(env, names(temp.data))], 
+                mean) * tapply(temp.data[, match(numrep[i], names(temp.data))], 
+                temp.data[, match(env, names(temp.data))], mean))/sum(tapply(temp.data[, 
+                match(numrep[i], names(temp.data))], temp.data[, 
+                match(env, names(temp.data))], mean))
+            varcomp_her <- summary(model)@REmat
+            error.gxe.var <- as.numeric(varcomp_her[varcomp_her[, 
+                1] == "Residual", "Variance"])
+            if (weight == "none") 
+                sigma2.ge <- error.gxe.var - error.variance
+            if (weight == "stderr") 
+                sigma2.ge <- 1
+            varcomp <- NULL
+            for (j in (1:length(VarCorr(model)))) {
+                varcomp <- rbind(varcomp, data.frame(Groups = names(VarCorr(model))[j], 
+                  Variance = VarCorr(model)[[j]][1], Std.Dev. = attr(VarCorr(model)[[j]], 
+                    "stddev")[[1]]))
+            }
+            if (sigma2.ge < 0) {
+                sigma2.ge <- 0
+            }
+            varcomp <- rbind(varcomp, data.frame(Groups = "Residual", 
+                Variance = attr(VarCorr(model), "sc")^2, Std.Dev. = attr(VarCorr(model), 
+                  "sc")))
+            result[[i]]$varcomp.table <- varcomp
+            myformula2 <- gsub(paste(" + ", trt.stmt, sep = ""), 
+                "", myformula1, fixed = TRUE)
+            if (!is.genoRandom) {
+            }
+            else {
+                model2 <- lmer(formula(myformula2), weights = temp.data$computedWeight, 
+                  data = temp.data, REML = T)
+                models.table2 <- modelComparisonTable(model, 
+                  model2)
+                result[[i]]$formula2 <- myformula2
+                result[[i]]$testsig.Geno <- models.table2
+            }
+            if (is.genoRandom) {
+                myformula3 <- gsub(paste(" + (1|", env, ")", 
+                  sep = ""), "", myformula1, fixed = TRUE)
+                model3 <- lmer(formula(myformula3), weights = temp.data$computedWeight, 
+                  data = temp.data, REML = T)
+                models.table3 <- modelComparisonTable(model, 
+                  model3)
+                result[[i]]$formula3 <- myformula3
+                result[[i]]$testsig.Env <- models.table3
+                genetic.var <- varcomp[varcomp[, 1] == geno, 
+                  "Variance"]
+                heritability <- genetic.var/(genetic.var + (sigma2.ge/numEnv) + 
+                  (error.variance/(numRep * numEnv)))
+                heritability <- format(round(heritability, digits = 2), 
+                  digits = 2, nsmall = 2, scientific = FALSE)
+                result[[i]]$heritability <- heritability
+                sumStat.Geno <- eval(parse(text = paste("coef(model)$", 
+                  geno, sep = "")))
+                sumStat.Geno <- cbind(rownames(sumStat.Geno), 
+                  sumStat.Geno)
+                colnames(sumStat.Geno) <- c(geno, "Mean")
+            }
+            else {
+                myformula4 <- gsub("~ 1", "~ 0", myformula1, 
+                  fixed = TRUE)
+                model.noint <- lmer(formula(myformula4), weights = temp.data$computedWeight, 
+                  data = temp.data)
+                sumStat.Geno <- data.frame(summary(model.noint)@coefs)[, 
+                  1:2]
+                rownames(sumStat.Geno) <- gsub(geno, "", rownames(sumStat.Geno))
+                sumStat.Geno <- cbind(rownames(sumStat.Geno), 
+                  sumStat.Geno)
+                colnames(sumStat.Geno) <- c(geno, "LSMean", "StdErrMean")
+                noEntries <- nlevels(temp.data[, match(geno, 
+                  names(temp.data))])
+                covs <- as.matrix(vcov(model.noint)[1:noEntries, 
+                  1:noEntries])
+                vars <- diag(covs)
+                vdiff <- outer(vars, vars, "+") - 2 * covs
+                sed <- sqrt(vdiff[upper.tri(vdiff)])
+                minSed <- formatC(as.numeric(format(min(sed), 
+                  scientific = FALSE)), format = "f")
+                meanSed <- formatC(as.numeric(format(mean(sed), 
+                  scientific = FALSE)), format = "f")
+                maxSed <- formatC(as.numeric(format(max(sed), 
+                  scientific = FALSE)), format = "f")
+                sedCol <- rbind(minSed, meanSed, maxSed)
+                rowNames <- rbind("Minimum  ", "Average  ", "Maximum  ")
+                sedTable <- as.table(cbind(rowNames, sedCol))
+                rownames(sedTable) <- c("", "", "")
+                colnames(sedTable) <- c("", "Estimate")
+                result[[i]]$sedTable <- sedTable
+            }
+            rownames(sumStat.Geno) <- NULL
+            result[[i]]$means.Geno <- sumStat.Geno
+            result[[i]]$means.Env <- sumStat.Env
+            result[[i]]$residuals <- resid(model)
+            result[[i]]$fitted.values <- fitted(model)
+            result[[i]]$data <- subset(temp.data, select = c(env, 
+                geno, respvar[i], stderr[i], sigma2[i], numrep[i], 
+                "CodedGeno", "CodedEnv"))
+        }
+    }
+    detach("package:lme4")
+    return(result)
+}
