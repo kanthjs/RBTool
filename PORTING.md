@@ -14,7 +14,7 @@ Approach (user decision, 2026-11-03): like STAR -> RDstat (github.com/kanthjs/ST
 | `prototype/tests/test_server.R` | headless `testServer` test of the app (28 checks) |
 | `reference/r-original/` | 321 functions of the original PBTools 1.1, one `.R` per function (from `deparse`, comments lost) |
 | `reference/pbtools-r-fork/` | shingocat/PBTools source, a commented and slightly different version (GPL-2) |
-| `reference/java-rbridge/` | decompiled `RJavaManager1.0.jar`: the Java-to-R bridge (CFR 0.152, `reference/tools/`, git-ignored) |
+| `reference/java-rbridge/` | decompiled `RJavaManager1.0.jar` from **STAR** (a newer build than the one in PBTools 1.1, see "Provenance check"): the Java-to-R bridge (CFR 0.152, `reference/tools/`, git-ignored) |
 | `reference/original-outputs/` | output of the original on R 2.15.1 for the shared cases (`ssa`, `designs`, `ms`, `gxe`) |
 | `reference/pbtools-port/` | package `PBToolsRD`: the PBTools functions ported to R 4.5 (the yardstick) |
 | `reference/data/` | PBTools example data used by the scripts |
@@ -26,6 +26,18 @@ R versions: original `C:\RPackages\R-2.15.1\bin\i386\Rscript.exe` (lme4 0.999999
 ## How PBTools works
 
 Menu item -> Java handler -> dialog -> manager in `RJavaManager1.0.jar` (`PBToolAnalysisManager`), which builds R command strings and evaluates them through JRI: `read.csv` into `data`, `sink()` to a text file, `ssa.test(...)`, `GEOneStage.test(...)`, `GETwoStage.test(...)`, `stability.analysis(...)`, `multiplicativeModels(...)`, `ssa.pairwise(...)`. `initPBtool()` runs `library(PBTools)`. All statistics are in the R package; the Java side only formats calls and output.
+
+## Provenance check (2026-11-04)
+
+Question: do the reference sources match the PBTools installed at `C:\PBTools`?
+
+Menu. `Application.e4xmi` in `C:\PBTools\plugins\Star_1.0.0.201406021442.jar` (PBTools is the same Eclipse code base as STAR, product `Star.product`) has Analysis > Single-environment Analysis; Multi-environment Analysis > One-Stage, Two-Stage, GxE Analysis > Stability Models, Multiplicative Models; plus Selection Index, QTL, Mating Designs, Generation Mean. The first five are the scope of this project.
+
+R functions. The shingocat fork (`reference/pbtools-r-fork`) was compared with `reference/r-original` (deparsed from the installed `C:\RPackages\R-2.15.1\library\PBTools`) by parsing both and comparing the deparsed functions. Of 63 functions in both, 58 are identical. In scope, identical: `ssa.pairwise`, `ssa.resid`, `GEOneStage_resid`, `GETwoStage_resid`, `GETwoStage.dataRecode`, `stability.analysis`, `multiplicativeModels`, `ammi.analysis(2)`, `gge.analysis(2)`, `AMMI.contour`, `genoNpheno.corr`, `DescriptiveStatistics`. Different: `ssa.test`, `GEOneStage.test`, `GETwoStage.test` (only lme4 1.x accessors, `@coefs` -> `$coefficients`, `@REmat` -> `$sigma^2`, and one heading text), plus `trimStrings` and `graph.mea1s.diagplots` (no effect on results). The fork has 99 functions that the installed package does not have (`doSEA`, `doMEA`, contrasts, QTL, ...): a later development version. The port (`reference/pbtools-port`) is built from `r-original`, not from the fork, and differs from it only in the five functions changed on purpose (see "Changes made in the port"). The yardstick is therefore the installed PBTools.
+
+Java bridge. The installed bridge is `lib/RJavaManager1.0.jar` inside the plugin (md5 `1846cb4e04396665b011b0feebf43e24`, same file as `configuration/org.eclipse.osgi/bundles/1/1/.cp/lib/`). Its class files were read directly (constant pool: string literals and method names) and compared with `reference/java-rbridge`: all 18 classes, all 950 strings of `PBToolAnalysisManager` and all its 31 methods are present in the repo sources. The repo sources (decompiled from STAR's jar) contain more: `doSingleEnvironmentAnalysisPRep` (`ssaTestPrep`), `doOutlierDetection`, `doSingleEnvironmentAnalysis2`, linear / nonlinear / PLS / factorial regression, and, inside the single-environment and one-stage dialogs, the Augmented Alpha-Lattice and Augmented Row-Column designs, an lmerTest F table, `contrastAnalysis` and the object-based `doMEA` calls. These belong to the later version; PBTools 1.1 does not have them. The randomization and design managers also differ (argument names, e.g. `check` vs `numCheck`), outside the scope. The engine, app, scripts and docs use none of the later-version features.
+
+Open: (1) decompile the installed jar (`java -jar cfr-0.152.jar RJavaManager1.0.jar --outputdir reference/java-rbridge`) and replace the STAR sources; (2) confirm which R the GUI loads (no R path is stored in the jars; likely the install4j launcher or PATH / registry), expected `C:\RPackages\R-2.15.1`.
 
 ## Checks
 
