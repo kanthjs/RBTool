@@ -20,6 +20,7 @@ The statistics are computed with published R packages instead of PBTools' own fu
 | `prototype/tests/test_server.R` | headless test of the app |
 | `reference/` | the original PBTools: recovered R functions, decompiled Java bridge, outputs of the original on R 2.15.1, and `pbtools-port` (PBTools ported to R 4.5, the yardstick) |
 | `scripts/` | `compare_engine.R` (engine vs PBTools), `check_port.sh` (port vs original), case scripts, `build_app.R`, `make_examples.R` |
+| `docs/PBTOOLS_GUIDE.md` | start here (Thai): how PBTools works, the scope, the models, the reference material, and how to continue on another machine |
 | `docs/PACKAGES.md` | why these packages, and how their results compare with PBTools |
 | `PORTING.md` | reverse-engineering notes and every known difference |
 
