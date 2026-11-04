@@ -71,6 +71,7 @@ pb_one_stage <- function(data, traits, geno, env, design = "RCB", block, column 
   }
   res <- lapply(out[c("info", "varcomp", "lrt", "geno", "env", "genoenv", "diag")], pb_bind)
   res$models <- out$models; res$formulas <- unlist(out$formulas); res$random <- random; res$method <- "one-stage"
+  res$descriptive <- pb_descriptive(data, traits)
   res
 }
 
@@ -109,6 +110,7 @@ pb_two_stage <- function(stage1, mean = "Mean", se = "SE", error_var = "ErrorVar
                                 Weight = if (weight == "stderr") "1/SE^2" else "none", Heritability = h2, check.names = FALSE),
               varcomp = cbind(Trait = mean, vc), lrt = if (!is.null(lr)) cbind(Trait = mean, lr), geno = cbind(Trait = mean, gm),
               env = cbind(Trait = mean, em), genoenv = NULL, diag = pb_diag_frame(m, mean),
-              models = if (!random) stats::setNames(list(m), mean), formulas = gsub("`", "", f1), random = random, method = "two-stage")
+              models = if (!random) stats::setNames(list(m), mean), formulas = gsub("`", "", f1), random = random, method = "two-stage",
+              descriptive = pb_descriptive(stage1, mean))
   res
 }

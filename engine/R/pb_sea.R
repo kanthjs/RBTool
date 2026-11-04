@@ -13,6 +13,7 @@ pb_sea <- function(data, traits, geno, design = "RCB", block, column = NULL, rep
   if (pb_needs_rep(design) && is.null(rep)) stop("This design needs a replicate variable.", call. = FALSE)
   pb_check_cols(data, traits, geno, block, column, rep, env)
   data <- as.data.frame(data)
+  desc <- pb_descriptive(data, traits, env)
   if (is.null(env)) { env <- ".env"; data[[env]] <- "1" }
   data[[env]] <- pb_factor(data[[env]])
   exclude_check <- isTRUE(exclude_check) && random && design %in% c("AugRCB", "AugLS")
@@ -79,7 +80,7 @@ pb_sea <- function(data, traits, geno, design = "RCB", block, column = NULL, rep
     out$formulas[[key]] <- gsub("`", "", f1)
   }
   res <- lapply(out[c("summary", "varcomp", "lrt", "means", "diag", "sed")], pb_bind)
-  res$models <- out$models; res$formulas <- unlist(out$formulas)
+  res$models <- out$models; res$formulas <- unlist(out$formulas); res$descriptive <- desc
   res$random <- random; res$design <- design; res$single_env <- identical(env, ".env")
   if (res$single_env) for (k in c("summary", "varcomp", "lrt", "means", "diag", "sed")) if (!is.null(res[[k]])) res[[k]]$Environment <- NULL
   res

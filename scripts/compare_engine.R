@@ -45,6 +45,20 @@ sea_case("Augmented latin square, random, checks excluded", augls, "Y", "Entry",
 sea_case("Latinized alpha, random", al, "Y", "Geno", "LatinAlpha", "Row", rep = "Rep", random = TRUE)
 sea_case("Latinized row-column, fixed", rcl, "Y", "Geno", "LatinRowCol", "Row", "Col", "Rep", random = FALSE)
 
+# ---- descriptive statistics (PBTools DescriptiveStatistics, default statistics: nnmiss, mean, sd) ----
+desc_case <- function(case, data, trait, env = NULL) {
+  e <- pb_descriptive(data, trait, env)
+  p <- if (is.null(env)) PBToolsRD::DescriptiveStatistics(data, trait, grp = NULL) else PBToolsRD::DescriptiveStatistics(data, trait, env)
+  if (!is.null(env)) p <- p[match(e$Environment, as.character(p[[env]])), ]
+  cmp(case, "N non-missing, mean, SD", c(e$`N non-missing`, e$Mean, e$SD), c(p$N_NonMissObs, p$Mean, p$StdDev), 1e-10)
+}
+rcb_na <- rcb; rcb_na$Yield[c(3, 50, 51)] <- NA
+invisible(capture.output({
+  desc_case("Descriptive, by environment (single environment)", rcb_na, "Yield", "Env")
+  desc_case("Descriptive, all plots (one-stage)", rcb_na, "Yield")
+  desc_case("Descriptive, stage-1 means (two-stage)", two, names(two)[sapply(two, is.numeric)][1])
+}))
+
 # ---- pairwise comparisons (multcomp) ----
 e <- pb_sea(rc1, "Y", "Geno", "RowCol", "Row", "Col", "Rep", random = FALSE)
 p <- suppressWarnings(PBToolsRD::pb_ssa(rc1, "Y", "Geno", "RowCol", "Row", "Col", "Rep", random = FALSE))

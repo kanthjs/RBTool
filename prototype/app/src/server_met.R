@@ -63,6 +63,9 @@ output$met_results <- renderUI({
               stat("Method", r$method, if (!is.null(r$info$Weight)) paste("weights:", r$info$Weight[1]))),
     if (identical(r$info$Weight[1], "1/SE^2")) note_box("With weights 1/SE², the variance components and SE follow lme4 1.x; PBTools 1.1 (old lme4) printed them on another scale. The means agree. See the Methods page."),
     result_card("สรุปผล (ภาษาไทย)", p(lang = "th", met_thai(r)), copy = "cp_met_th", copy_label = "คัดลอก"),
+    result_card("Descriptive statistics", html_table(fmt_df(r$descriptive)), copy = "cp_met_desc",
+      p(class = "text-muted small mb-0", if (r$method == "one-stage") "Plot data of all environments together, as PBTools (DescriptiveStatistics)."
+        else "Stage-1 means of all environments together, as PBTools (DescriptiveStatistics).")),
     result_card("Summary", html_table(fmt_df(r$info))),
     result_card(if (isTRUE(r$random)) "Genotype BLUPs across environments" else "Genotype means across environments (BLUEs) and SE", html_table(fmt_df(r$geno)), copy = "cp_met_geno"),
     result_card("Environment means", html_table(fmt_df(r$env))),
@@ -75,6 +78,7 @@ output$met_results <- renderUI({
     result_card("Model", tags$pre(class = "small mb-0", paste(r$formulas, collapse = "\n"))))
 })
 copy_btn("cp_met_th", function() met_thai(rv$met), "summary")
+copy_btn("cp_met_desc", function() tsv(fmt_df(rv$met$descriptive)), "descriptive statistics")
 copy_btn("cp_met_geno", function() tsv(fmt_df(rv$met$geno)), "genotype means")
 copy_btn("cp_met_ge", function() tsv(fmt_df(rv$met$genoenv)), "GxE means")
 
@@ -103,7 +107,7 @@ met_diag_fn <- diag_server("met", reactive(rv$met))
 output$met_data <- renderUI(data_preview_ui(met_dat()$d))
 
 met_tables <- function() { r <- rv$met; x <- met_pw()
-  Filter(Negate(is.null), list(Summary = r$info, `Genotype means` = r$geno, `Environment means` = r$env, `Variance components` = r$varcomp,
+  Filter(Negate(is.null), list(`Descriptive statistics` = r$descriptive, Summary = r$info, `Genotype means` = r$geno, `Environment means` = r$env, `Variance components` = r$varcomp,
                                LRT = r$lrt, `GxE means` = r$genoenv, `Stage-1 table` = r$stage1, `Pairwise comparisons` = x$table, `Letter groups` = x$letters)) }
 output$dl_met_xlsx <- downloadHandler("pbtools_multi_environment.xlsx", function(file) writexl::write_xlsx(met_tables(), file))
 output$dl_met_doc <- downloadHandler("pbtools_multi_environment_report.doc", function(file) {

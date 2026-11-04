@@ -23,6 +23,9 @@ testServer(app, {
   check(is.null(rv$sea_err) && nrow(r$summary) == 11, "single env random: 11 environments")
   check(abs(r$summary$Heritability[r$summary$Environment == "E2"] - 0.95) < 0.01, "single env random: heritability E2 = 0.95 (PBTools)")
   check(grepl("Heritability", html(output$sea_results)) && grepl("result-card", html(output$sea_results)), "single env: key numbers and result cards")
+  ds <- r$descriptive[r$descriptive$Environment == "E1", ]
+  check(nrow(r$descriptive) == 11 && ds$`N non-missing` == 45 && abs(ds$Mean - 2403.838) < 0.001 && grepl("Descriptive statistics", html(output$sea_results)),
+        "single env: descriptive statistics by environment (PBTools: E1 n = 45)")
   go("go_sea", sea_random = "fixed")
   check(!is.null(rv$sea$models) && length(rv$sea$models) == 11, "single env fixed: one model per environment for the comparisons")
   session$setInputs(sea_pw_type = "Tukey", sea_pw_alpha = "0.05", sea_pw_all = FALSE, sea_pw_control = character())
@@ -52,6 +55,8 @@ testServer(app, {
   go("go_met", met_trait = "Yield", met_geno = "Genotype", met_env = "Env", met_block = "Block", met_random = "random")
   check(is.null(rv$met_err) && !is.na(rv$met$info$Heritability), paste("one-stage random: heritability across sites", rv$met_err))
   check(grepl("GxE interaction", html(output$met_results)), "one-stage: GxE test in the key numbers")
+  check(nrow(rv$met$descriptive) == 1 && rv$met$descriptive$`N non-missing` == 495 && grepl("Descriptive statistics", html(output$met_results)),
+        "one-stage: descriptive statistics of all plots (n = 495)")
   session$setInputs(met_method = "two", met_s1 = "calc", met_weight = "none")
   go("go_met", met_random = "fixed")
   check(is.null(rv$met_err) && nrow(rv$met$stage1) == 165, paste("two-stage from plot data: 165 stage-1 means", rv$met_err))

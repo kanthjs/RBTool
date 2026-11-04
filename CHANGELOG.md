@@ -14,6 +14,7 @@ All notable changes to PBTool-Rev. Dates are when the change was made; versions 
 - Alpha-lattice, augmented RCB, augmented latin square and latinized row-column examples: the simulated layouts were not valid designs (some genotypes appeared twice in a replicate). `scripts/check_examples.R` now checks every example layout.
 
 ### Added
+- Descriptive statistics (`pb_descriptive`), as PBTools `DescriptiveStatistics` with the statistics its dialogs use (number of non-missing observations, mean, SD): by environment on the single-environment screen, over all plots for one-stage, over the stage-1 means for two-stage. Shown as a result card and in the Excel and Word downloads; identical to PBTools (`scripts/compare_engine.R`).
 - `scripts/check_examples.R` (example layouts), `scripts/timing.R` (time of each analysis).
 - multcompView declared for Shinylive and the deploy workflow.
 

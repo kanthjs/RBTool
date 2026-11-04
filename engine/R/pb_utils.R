@@ -32,6 +32,28 @@ pb_read_table <- function(path, name = path) {
   d
 }
 
+# Descriptive statistics of a trait, as PBTools DescriptiveStatistics() with the statistics its analysis dialogs ask
+# for (number of non-missing observations, mean, standard deviation). By environment when `env` is given (PBTools:
+# single environment); over all rows otherwise (PBTools: one-stage on the plot data, two-stage on the stage-1 means).
+pb_descriptive <- function(data, traits, env = NULL) {
+  env <- pb_null_if_empty(env)
+  pb_check_cols(data, traits, env)
+  data <- as.data.frame(data)
+  grp <- if (is.null(env)) factor(rep("all", nrow(data))) else pb_factor(data[[env]])
+  out <- lapply(traits, function(tr) {
+    s <- lapply(split(pb_num(data[[tr]]), grp), function(y) {
+      y <- y[!is.na(y)]
+      c(length(y), if (length(y)) mean(y) else NA_real_, if (length(y) > 1) stats::sd(y) else NA_real_)
+    })
+    s <- do.call(rbind, s)
+    data.frame(Trait = tr, Environment = levels(grp), `N non-missing` = as.integer(s[, 1]), Mean = s[, 2], SD = s[, 3],
+               row.names = NULL, check.names = FALSE)
+  })
+  out <- pb_bind(out)
+  if (is.null(env)) out$Environment <- NULL
+  out
+}
+
 pb_check_cols <- function(data, ...) {
   cols <- unlist(list(...)); cols <- cols[!is.na(cols) & nzchar(cols)]
   miss <- setdiff(cols, names(data))

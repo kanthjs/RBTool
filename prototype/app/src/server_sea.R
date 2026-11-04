@@ -48,6 +48,8 @@ output$sea_results <- renderUI({
               if (isTRUE(r$random)) stat("Heritability", sprintf("%.2f", stats::median(s$Heritability)), if (nrow(s) > 1) sprintf("median; range %.2f to %.2f", min(s$Heritability), max(s$Heritability)))
               else stat("Average SED", fmt_n(mean(s$`Average SED`)), "standard error of a difference")),
     result_card("สรุปผล (ภาษาไทย)", p(lang = "th", sea_thai(r)), p(lang = "th", class = "text-muted small mb-0", "สรุปนี้สร้างจากโปรแกรม ควรอ่านร่วมกับบริบทของการทดลอง"), copy = "cp_sea_th", copy_label = "คัดลอก"),
+    result_card("Descriptive statistics", html_table(fmt_df(r$descriptive)), copy = "cp_sea_desc",
+      p(class = "text-muted small mb-0", "Raw data of each trait, by environment, as PBTools (DescriptiveStatistics).")),
     result_card("Summary by environment", html_table(fmt_df(s)), copy = "cp_sea_sum"),
     result_card(if (isTRUE(r$random)) "Predicted genotype values (BLUPs)" else "Adjusted genotype means (BLUEs) and SE", html_table(fmt_df(r$means)), copy = "cp_sea_means"),
     result_card("Variance components", html_table(fmt_df(r$varcomp)), copy = "cp_sea_vc"),
@@ -56,6 +58,7 @@ output$sea_results <- renderUI({
     result_card("Model", tags$pre(class = "small mb-0", paste(names(r$formulas), r$formulas, sep = ":  ", collapse = "\n"))))
 })
 copy_btn("cp_sea_th", function() sea_thai(rv$sea), "summary")
+copy_btn("cp_sea_desc", function() tsv(fmt_df(rv$sea$descriptive)), "descriptive statistics")
 copy_btn("cp_sea_sum", function() tsv(fmt_df(rv$sea$summary)), "summary table")
 copy_btn("cp_sea_means", function() tsv(fmt_df(rv$sea$means)), "means")
 copy_btn("cp_sea_vc", function() tsv(fmt_df(rv$sea$varcomp)), "variance components")
@@ -79,7 +82,7 @@ sea_diag_fn <- diag_server("sea", reactive(rv$sea))
 output$sea_data <- renderUI(data_preview_ui(sea_dat()$d))
 
 sea_tables <- function() { r <- rv$sea; x <- sea_pw()
-  Filter(Negate(is.null), list(Summary = r$summary, Means = r$means, `Variance components` = r$varcomp, LRT = r$lrt, SED = r$sed,
+  Filter(Negate(is.null), list(`Descriptive statistics` = r$descriptive, Summary = r$summary, Means = r$means, `Variance components` = r$varcomp, LRT = r$lrt, SED = r$sed,
                                `Pairwise comparisons` = x$table, `Letter groups` = x$letters)) }
 output$dl_sea_xlsx <- downloadHandler("pbtools_single_environment.xlsx", function(file) writexl::write_xlsx(sea_tables(), file))
 output$dl_sea_doc <- downloadHandler("pbtools_single_environment_report.doc", function(file) {
