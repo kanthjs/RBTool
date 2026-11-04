@@ -129,7 +129,8 @@ RBTool มีบางอย่างที่ PBTools ไม่มี ได้
 
 ## 8. งานที่ยังค้าง
 
-- รัน `test_server.R` บน Windows หลังเพิ่ม Descriptive statistics (บนเครื่อง cloud รันไม่ได้เพราะ bslib เก่า)
-- (ไม่เร่ง) decompile jar ของ PBTools จริงมาแทนชุดของ STAR ใน `reference/java-rbridge`
-- (ไม่เร่ง) ยืนยันว่า GUI เรียกใช้ R ที่ `C:\RPackages\R-2.15.1`
-- งานที่ `PORTING.md` ระบุว่ายังไม่ได้ทำ: ตรวจว่า deploy ขึ้น GitHub Pages ได้สำเร็จ, ตรวจข้อความภาษาไทย และจับเวลาการทำงานในเบราว์เซอร์ (metan ดึงแพ็กเกจตามมาจำนวนมาก)
+- ~~รัน `test_server.R` บน Windows หลังเพิ่ม Descriptive statistics~~ ทำแล้ว 4 พ.ย. 2569 บนเครื่อง Windows ที่มี R 2.15.1 (ไม่มี `C:\PBTools`): `compare_engine.R` 97/97, `test_server.R` 30/30
+- (ไม่เร่ง ทำได้เฉพาะเครื่องที่ติดตั้ง PBTools ไว้ที่ `C:\PBTools`) decompile jar ของ PBTools จริงมาแทนชุดของ STAR ใน `reference/java-rbridge`
+- (ไม่เร่ง ทำได้เฉพาะเครื่องที่ติดตั้ง PBTools) ยืนยันว่า GUI เรียกใช้ R ที่ `C:\RPackages\R-2.15.1`
+- ~~ตรวจว่า deploy ขึ้น GitHub Pages ได้สำเร็จ~~ สำเร็จแล้ว 4 พ.ย. 2569: https://kanthjs.github.io/RBTool/ (ยังไม่ได้ลองเปิดใช้งานจริงในเบราว์เซอร์)
+- ตรวจข้อความภาษาไทย และจับเวลาการทำงานในเบราว์เซอร์ (metan ดึงแพ็กเกจตามมาจำนวนมาก)
