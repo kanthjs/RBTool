@@ -1,4 +1,4 @@
-# PBTool-Rev
+# RBTool
 
 Web app for the analysis of plant breeding trials in the spirit of IRRI **PBTools** (Phenotypic Analysis menu): single-environment, multi-environment (one-stage and two-stage) and genotype x environment / stability analyses. It runs R in the browser with Shinylive, like its sister project [RDstat](https://github.com/kanthjs/RDstat).
 

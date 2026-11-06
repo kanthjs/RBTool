@@ -34,6 +34,18 @@ methods_ui <- div(class = "container", style = "max-width: 820px;",
     tags$li("Tukey/Dunnett: ค่าเริ่มต้นใช้ emmeans (Tukey-Kramer, Dunnett แบบประมาณ) เร็วกว่ามาก ช่วงความเชื่อมั่นต่างจาก multcomp ของ PBTools ไม่เกินราว 1% ในข้อมูลไม่สมดุล วิธี multcomp คำนวณจุดวิกฤตเชิงตัวเลข แอปกำหนด seed ให้ผลซ้ำได้")),
   h4("เอกสารอ้างอิง"), tags$ul(lapply(method_refs, tags$li)))
 
+cite_app <- sprintf("Jaisong K (%s). %s: analysis of plant breeding trials in the browser, in the spirit of IRRI PBTools. Version %s. https://kanthjs.github.io/RBTool/",
+  if (anyNA(app_version)) format(Sys.Date(), "%Y") else substr(app_version[["built"]], 1, 4), app_name,
+  if (anyNA(app_version)) "development build" else app_version[["version"]])
+cite_packages <- c(
+  "ทุกการวิเคราะห์: R Core Team. R: A language and environment for statistical computing. R Foundation for Statistical Computing, Vienna, Austria. https://www.R-project.org/",
+  "Single environment, multi-environment (BLUEs/BLUPs, variance components): Bates D, Maechler M, Bolker B, Walker S (2015). Fitting linear mixed-effects models using lme4. Journal of Statistical Software 67(1): 1-48. doi:10.18637/jss.v067.i01",
+  "ค่าเฉลี่ยและการเปรียบเทียบค่าเฉลี่ย (ค่าเริ่มต้น): Lenth RV, Piaskowski J. emmeans: Estimated marginal means, aka least-squares means. R package. doi:10.32614/CRAN.package.emmeans",
+  "การเปรียบเทียบค่าเฉลี่ยแบบ exact (เหมือน PBTools): Hothorn T, Bretz F, Westfall P (2008). Simultaneous inference in general parametric models. Biometrical Journal 50(3): 346-363. doi:10.1002/bimj.200810425",
+  "ตัวอักษรจัดกลุ่มค่าเฉลี่ย: Graves S, Piepho HP, Selzer L. multcompView: Visualizations of paired comparisons. R package. doi:10.32614/CRAN.package.multcompView",
+  "Shukla แบบ PBTools: Pinheiro J, Bates D, R Core Team. nlme: Linear and nonlinear mixed effects models. R package. doi:10.32614/CRAN.package.nlme",
+  "Finlay-Wilkinson, Shukla, ดัชนีเสถียรภาพ, AMMI, GGE: Olivoto T, Lucio AD (2020). metan: An R package for multi-environment trial analysis. Methods in Ecology and Evolution 11(6): 783-789. doi:10.1111/2041-210X.13384")
+
 about_ui <- div(class = "container", style = "max-width: 820px;",
   h3("About"),
   p(sprintf("%s ทำการวิเคราะห์ข้อมูลการทดลองปรับปรุงพันธุ์พืชตามแนวทางของโปรแกรม PBTools (Plant Breeding Tools) ของสถาบันวิจัยข้าวนานาชาติ (IRRI) เป็นแอปเว็บที่รัน R ภายในเบราว์เซอร์ ออกแบบให้ใช้งานคล้าย RDstat", app_name)),
@@ -41,6 +53,10 @@ about_ui <- div(class = "container", style = "max-width: 820px;",
   h4("ข้อมูลของคุณ"), p("ไฟล์ของคุณถูกอ่านและวิเคราะห์ภายในเบราว์เซอร์ ไม่ได้ถูกอัปโหลดไปยังเซิร์ฟเวอร์ใด"),
   h4("รุ่นของแอป"), p(code(version_label())),
   h4("ผู้ดูแล"), p(app_maintainer),
-  h4("ซอร์สโค้ด"), p(tags$a(href = "https://github.com/kanthjs/PBTool-Rev", target = "_blank", "github.com/kanthjs/PBTool-Rev")),
+  h4("ซอร์สโค้ด"), p(tags$a(href = "https://github.com/kanthjs/RBTool", target = "_blank", "github.com/kanthjs/RBTool")),
+  h4("วิธีอ้างอิง"),
+  p("ถ้านำผลจากแอปนี้ไปตีพิมพ์ โปรดอ้างอิงทั้งแอปและแพ็กเกจ R ที่คำนวณการวิเคราะห์ที่คุณรายงาน (รุ่นของแพ็กเกจดูได้ที่หน้า Methods)"),
+  p(code(cite_app)),
+  tags$ul(lapply(cite_packages, tags$li)),
   h4("ฟอนต์"), p("ข้อความในแอปใช้ฟอนต์ จุฬาภรณ์ลิขิต (Chulabhorn Likhit) ฟอนต์แห่งชาติจากราชวิทยาลัยจุฬาภรณ์"),
   h4("สัญญาอนุญาต"), p("GNU General Public License รุ่น 2 หรือใหม่กว่า (PBTools เป็น GPL >= 2)"))

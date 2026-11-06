@@ -1,4 +1,4 @@
-# PBTool-Rev web app: single-environment, multi-environment and GxE / stability analyses of plant breeding trials, in
+# RBTool web app: single-environment, multi-environment and GxE / stability analyses of plant breeding trials, in
 # the spirit of IRRI PBTools, computed with published R packages (lme4, emmeans, multcomp, nlme, metan). The layout and
 # look follow RDstat (github.com/kanthjs/RDstat). The engine sources in ./engine are copied from engine/R by
 # scripts/build_app.R.
@@ -12,7 +12,7 @@ if (FALSE) {
 engine_dir <- if (dir.exists("engine")) "engine" else file.path("..", "..", "engine", "R")
 for (f in sort(list.files(engine_dir, pattern = "[.]R$", full.names = TRUE))) source(f, local = FALSE)
 
-app_name <- "PBTool-Rev"
+app_name <- "RBTool"
 app_maintainer <- "Kanthanawit Jaisong"
 source("src/helpers.R", local = TRUE)
 source("src/style.R", local = TRUE)       # brand colours and CSS (from RDstat)

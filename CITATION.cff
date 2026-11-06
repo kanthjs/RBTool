@@ -1,0 +1,105 @@
+cff-version: 1.2.0
+message: >-
+  If you use RBTool in published work, please cite RBTool and the R packages that computed
+  the analysis you report (listed below and on the app's Info page).
+title: "RBTool: analysis of plant breeding trials in the browser, in the spirit of IRRI PBTools"
+type: software
+authors:
+  - family-names: Jaisong
+    given-names: Kanthanawit
+version: 0.1.0
+url: "https://kanthjs.github.io/RBTool/"
+repository-code: "https://github.com/kanthjs/RBTool"
+license: GPL-2.0-or-later
+keywords:
+  - plant breeding
+  - multi-environment trials
+  - genotype by environment interaction
+  - R
+  - Shiny
+references:
+  - type: software
+    title: "R: A Language and Environment for Statistical Computing"
+    authors:
+      - name: R Core Team
+    publisher:
+      name: R Foundation for Statistical Computing
+    url: "https://www.R-project.org/"
+  - type: article
+    title: "Fitting Linear Mixed-Effects Models Using lme4"
+    authors:
+      - family-names: Bates
+        given-names: Douglas
+      - family-names: Mächler
+        given-names: Martin
+      - family-names: Bolker
+        given-names: Ben
+      - family-names: Walker
+        given-names: Steve
+    journal: Journal of Statistical Software
+    volume: 67
+    issue: 1
+    start: 1
+    end: 48
+    year: 2015
+    doi: 10.18637/jss.v067.i01
+  - type: software
+    title: "emmeans: Estimated Marginal Means, aka Least-Squares Means"
+    authors:
+      - family-names: Lenth
+        given-names: Russell V.
+      - family-names: Piaskowski
+        given-names: Julia
+    doi: 10.32614/CRAN.package.emmeans
+    url: "https://CRAN.R-project.org/package=emmeans"
+  - type: article
+    title: "Simultaneous Inference in General Parametric Models"
+    authors:
+      - family-names: Hothorn
+        given-names: Torsten
+      - family-names: Bretz
+        given-names: Frank
+      - family-names: Westfall
+        given-names: Peter
+    journal: Biometrical Journal
+    volume: 50
+    issue: 3
+    start: 346
+    end: 363
+    year: 2008
+    doi: 10.1002/bimj.200810425
+  - type: software
+    title: "multcompView: Visualizations of Paired Comparisons"
+    authors:
+      - family-names: Graves
+        given-names: Spencer
+      - family-names: Piepho
+        given-names: Hans-Peter
+      - family-names: Selzer
+        given-names: Luciano
+    doi: 10.32614/CRAN.package.multcompView
+    url: "https://CRAN.R-project.org/package=multcompView"
+  - type: software
+    title: "nlme: Linear and Nonlinear Mixed Effects Models"
+    authors:
+      - family-names: Pinheiro
+        given-names: José
+      - family-names: Bates
+        given-names: Douglas
+      - name: R Core Team
+    doi: 10.32614/CRAN.package.nlme
+    url: "https://CRAN.R-project.org/package=nlme"
+  - type: article
+    title: "metan: An R package for multi-environment trial analysis"
+    authors:
+      - family-names: Olivoto
+        given-names: Tiago
+      - family-names: Lúcio
+        given-names: Alessandro Dal'Col
+    journal: Methods in Ecology and Evolution
+    volume: 11
+    issue: 6
+    start: 783
+    end: 789
+    year: 2020
+    doi: 10.1111/2041-210X.13384

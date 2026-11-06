@@ -1,11 +1,12 @@
 # Changelog
 
-All notable changes to PBTool-Rev. Dates are when the change was made; versions follow the app version written by
+All notable changes to RBTool. Dates are when the change was made; versions follow the app version written by
 `scripts/build_app.R` (`0.1.<CI run number>` on GitHub Pages).
 
 ## Unreleased
 
 ### Changed
+- The project is named RBTool everywhere (app title, README, guide); the source link on the Info page pointed to github.com/kanthjs/PBTool-Rev and now points to github.com/kanthjs/RBTool.
 - Single-environment screen: RCBD only (the engine keeps all seven PBTools designs, and they are still checked against PBTools).
 - Mean comparisons are about 100 times faster: Tukey and Dunnett intervals now come from emmeans (Tukey-Kramer, Dunnett) and the letter groups from multcompView. Tukey for 11 sites took 5 minutes, now under 2 seconds. The exact multcomp intervals that PBTools uses are still available with the option "Exact intervals as in PBTools"; the default intervals agree with them within about 1% (identical for balanced data).
 - Row-column example (multi-environment) replaced by a valid layout: 25 genotypes, 5 x 5, two replicates built from two orthogonal latin squares, two sites.
@@ -14,6 +15,7 @@ All notable changes to PBTool-Rev. Dates are when the change was made; versions 
 - Alpha-lattice, augmented RCB, augmented latin square and latinized row-column examples: the simulated layouts were not valid designs (some genotypes appeared twice in a replicate). `scripts/check_examples.R` now checks every example layout.
 
 ### Added
+- `CITATION.cff` (RBTool and the R packages it uses) and a "วิธีอ้างอิง" (How to cite) section on the Info page: the citation of RBTool with its version, and the package to cite for each analysis, with DOIs.
 - Descriptive statistics (`pb_descriptive`), as PBTools `DescriptiveStatistics` with the statistics its dialogs use (number of non-missing observations, mean, SD): by environment on the single-environment screen, over all plots for one-stage, over the stage-1 means for two-stage. Shown as a result card and in the Excel and Word downloads; identical to PBTools (`scripts/compare_engine.R`).
 - `scripts/check_examples.R` (example layouts), `scripts/timing.R` (time of each analysis).
 - multcompView declared for Shinylive and the deploy workflow.
