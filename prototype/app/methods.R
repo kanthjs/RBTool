@@ -16,7 +16,7 @@ method_refs <- c(
 
 methods_ui <- div(class = "container", style = "max-width: 820px;",
   h3("วิธีการและซอฟต์แวร์"),
-  p("แอปนี้ทำการวิเคราะห์ตามเมนู Phenotypic Analysis ของ IRRI PBTools 1.1 โดยคำนวณด้วยแพ็กเกจ R ที่ตีพิมพ์และดูแลอยู่ แทนฟังก์ชันที่ PBTools เขียนเอง ผลทุกส่วนตรวจเทียบกับ PBTools (โค้ดต้นฉบับที่กู้คืนและรันบน R 2.15.1) ด้วยชุดทดสอบ 94 รายการ"),
+  p("แอปนี้ทำการวิเคราะห์ตามเมนู Phenotypic Analysis ของ IRRI PBTools 1.1 โดยคำนวณด้วยแพ็กเกจ R ที่ตีพิมพ์และดูแลอยู่ แทนฟังก์ชันที่ PBTools เขียนเอง ผลทุกส่วนตรวจเทียบกับ PBTools (โค้ดต้นฉบับที่กู้คืนและรันบน R 2.15.1) ด้วยชุดทดสอบ 99 รายการ"),
   uiOutput("methods_versions"),
   h4("Single environment"),
   p("แต่ละลักษณะในแต่ละสถานที่ (แบบแผน RCBD): linear mixed model (lme4, REML) ที่มี block เป็น random effect เหมือน PBTools พันธุ์ fixed: ค่าเฉลี่ยปรับแล้วและ SE จาก emmeans พันธุ์ random: BLUP, likelihood ratio test ของความแปรปรวนทางพันธุกรรม และ heritability = s2g / (s2g + s2e / r) เปรียบเทียบค่าเฉลี่ยด้วย Tukey หรือ Dunnett: ค่าเริ่มต้นใช้ emmeans (เร็ว ตรงกับวิธีของ PBTools เมื่อข้อมูลสมดุล) หรือเลือกวิธีแบบ PBTools (multcomp) ได้ และเพิ่มตัวอักษรกลุ่ม (multcompView)"),
@@ -25,7 +25,7 @@ methods_ui <- div(class = "container", style = "max-width: 820px;",
   h4("Descriptive statistics"),
   p("สถิติเชิงพรรณนา (descriptive statistics) ของข้อมูล คำนวณแบบเดียวกับฟังก์ชัน DescriptiveStatistics ของ PBTools ด้วยค่าที่หน้าต่างวิเคราะห์ของ PBTools ใช้ คือจำนวนข้อมูลที่ไม่สูญหาย ค่าเฉลี่ย และส่วนเบี่ยงเบนมาตรฐาน (ตัวหาร n − 1) Single environment แยกตามสถานที่ One-stage รวมทุกแปลงของทุกสถานที่ Two-stage ใช้ค่าเฉลี่ยขั้นที่ 1 ของทุกสถานที่"),
   h4("GxE and stability (metan)"),
-  p("Finlay-Wilkinson / Eberhart-Russell (metan::ge_reg), Shukla (metan::Shukla), ดัชนีความเสถียรหลายแบบ (metan::ge_stats), AMMI (metan::performs_ammi) และ GGE biplot (metan::gge)"),
+  p("Finlay-Wilkinson (slope b1) และ Eberhart-Russell (b1, ส่วนเบี่ยงเบนจากเส้นถดถอย s2di และ ANOVA ของ joint regression; พันธุ์เสถียรเมื่อ b1 ไม่ต่างจาก 1 และ s2di ไม่ต่างจาก 0) ทั้งสองแบบคำนวณด้วย metan::ge_reg, Shukla (metan::Shukla), ดัชนีความเสถียรหลายแบบ (metan::ge_stats), AMMI (metan::performs_ammi) และ GGE biplot (metan::gge)"),
   h4("ความต่างจาก PBTools ที่ควรรู้"),
   tags$ul(
     tags$li("Shukla: PBTools ไม่ได้ใช้สูตรของ Shukla (1972) แต่ประมาณส่วนเบี่ยงเบนมาตรฐานของ residual แยกตามพันธุ์ด้วย nlme::gls (REML) แอปแสดงทั้งสองแบบ ลำดับของพันธุ์ใกล้เคียงกันแต่ไม่เท่ากัน"),
@@ -44,7 +44,7 @@ cite_packages <- c(
   "การเปรียบเทียบค่าเฉลี่ยแบบ exact (เหมือน PBTools): Hothorn T, Bretz F, Westfall P (2008). Simultaneous inference in general parametric models. Biometrical Journal 50(3): 346-363. doi:10.1002/bimj.200810425",
   "ตัวอักษรจัดกลุ่มค่าเฉลี่ย: Graves S, Piepho HP, Selzer L. multcompView: Visualizations of paired comparisons. R package. doi:10.32614/CRAN.package.multcompView",
   "Shukla แบบ PBTools: Pinheiro J, Bates D, R Core Team. nlme: Linear and nonlinear mixed effects models. R package. doi:10.32614/CRAN.package.nlme",
-  "Finlay-Wilkinson, Shukla, ดัชนีเสถียรภาพ, AMMI, GGE: Olivoto T, Lucio AD (2020). metan: An R package for multi-environment trial analysis. Methods in Ecology and Evolution 11(6): 783-789. doi:10.1111/2041-210X.13384")
+  "Finlay-Wilkinson, Eberhart-Russell, Shukla, ดัชนีเสถียรภาพ, AMMI, GGE: Olivoto T, Lucio AD (2020). metan: An R package for multi-environment trial analysis. Methods in Ecology and Evolution 11(6): 783-789. doi:10.1111/2041-210X.13384")
 
 about_ui <- div(class = "container", style = "max-width: 820px;",
   h3("About"),

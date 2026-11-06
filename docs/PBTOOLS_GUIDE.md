@@ -95,7 +95,7 @@ AMMI ของ PBTools มาจากโค้ดของ agricolae ใช้ 
 | Descriptive statistics | `pb_descriptive` | เหมือน (ผลต่าง 0) |
 | Pairwise Tukey/Dunnett | `pb_pairwise` (ค่า default คือ emmeans ซึ่งเร็ว ตัวเลือก exact คือ multcomp) | exact เหมือน, default ต่างกันไม่เกิน 1% |
 | One-stage, two-stage | `pb_one_stage`, `pb_two_stage` | เหมือน |
-| Finlay-Wilkinson, Shukla | `pb_fw`, `pb_shukla` (รูปแบบ PBTools ใช้ nlme) | เหมือน |
+| Finlay-Wilkinson, Eberhart-Russell, Shukla | `pb_fw`, `pb_er`, `pb_shukla` (รูปแบบ PBTools ใช้ nlme) | เหมือน |
 | AMMI, GGE | `pb_ammi`, `pb_gge` (metan) | % และ score เหมือน, ค่า F ของ PC ต่างเล็กน้อย |
 | ยังไม่มี (ยอมรับให้ละไว้) | boxplot/histogram ข้อมูลดิบ, heatmap residual, geno-pheno correlation, response plot, biplot PC1–3/2–3, adaptation map, multiplicative ที่รับค่าเฉลี่ยเป็น input | – |
 
@@ -104,7 +104,7 @@ RBTool มีบางอย่างที่ PBTools ไม่มี ได้
 ห่วงโซ่การตรวจสอบมีสามขั้น
 
 1. port เทียบกับตัวจริง: `sh scripts/check_port.sh` 33 กรณี ถ้าจะสร้างผลอ้างอิงใหม่ด้วย `REGEN=1` ต้องมี R 2.15.1 ซึ่งมีเฉพาะเครื่องเดิม
-2. engine เทียบกับ port: `Rscript scripts/compare_engine.R` 97 จุด
+2. engine เทียบกับ port: `Rscript scripts/compare_engine.R` 99 จุด
 3. แอป: `Rscript prototype/tests/test_server.R` 30 ข้อ
 
 ความต่างที่รู้แล้วและบันทึกไว้ในหน้า Methods ของแอป

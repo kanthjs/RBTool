@@ -43,6 +43,13 @@ print(head(z, 5)); cat("Spearman (PBTools est.^2, agricolae sigma2):", round(cor
 ms2 <- metan::Shukla(rcb, Env, Genotype, Block, Yield, verbose = FALSE)$Yield
 z2 <- merge(z, data.frame(Genotype = ms2$GEN, metan = ms2$ShuklaVar))
 cat("metan::Shukla vs agricolae (raw RCB_ME data, not the same data as the PBTools est. above):\n"); print(head(z2, 3))
+# metan::Shukla vs agricolae::stability.par on the same data (RCB_ME genotype x site means, 3 reps)
+tab <- tapply(rcb$Yield, list(rcb$Genotype, rcb$Env), mean)
+err <- anova(lm(Yield ~ Env/Block + Genotype*Env, rcb))["Residuals", "Mean Sq"]
+sp2 <- stability.par(tab, rep = 3, MSerror = err, console = FALSE)$statistics
+z3 <- merge(data.frame(Genotype = ms2$GEN, metan = ms2$ShuklaVar), data.frame(Genotype = rownames(sp2), agricolae = sp2[["Sigma-square"]]))
+cat("metan::Shukla vs agricolae::stability.par, same data: max|agricolae / metan - 3|", mx(z3$agricolae / z3$metan, 3),
+    " Spearman", round(cor(z3$metan, z3$agricolae, method = "spearman"), 3), "(agricolae is on the replicate-total scale: x reps)\n")
 
 # ---- AMMI: PBTools ammi.analysis2 vs agricolae::AMMI (raw) vs metan::performs_ammi ----
 a <- pb_multiplicative(s1, "Yield_Mean", "Yield_sigma2", "Yield_No.rep", model = "AMMI")
@@ -59,4 +66,4 @@ g <- pb_multiplicative(s1, "Yield_Mean", "Yield_sigma2", "Yield_No.rep", model =
 mg <- gge(s1, Env, Genotype, Yield_Mean, scaling = "none", centering = "environment", svp = "symmetrical")
 cat("\n== GGE % explained: PBTools", head(g$analysis$percent, 3), " metan::gge", head(round(mg$Yield_Mean$varexpl, 1), 3), "\n")
 sg <- statgenGxE::gxeGGE(TD2, trait = "Yield_Mean")
-cat("statgenGxE::gxeGGE % explained:", head(round(sg$importance[2, ] * 100, 1), 3), "\n")
+cat("statgenGxE::gxeGGE % explained:", head(round(unlist(sg$importance[2, ]) * 100, 1), 3), "\n")

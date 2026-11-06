@@ -7,6 +7,13 @@ m <- match_on(fw$table, pfw, "Genotype")
 cmp("Finlay-Wilkinson (metan::ge_reg)", "slope", m$a$Slope, m$b$Slope)
 cmp("Finlay-Wilkinson (metan::ge_reg)", "genotype mean", m$a$Mean, m$b$Mean)
 
+# Eberhart-Russell: same slope; PBTools MSDev (deviation mean square on the genotype means) = metan s2di + pooled error / reps
+er <- pb_er(rcb, "Yield", "Genotype", "Env", "Block")
+m <- match_on(er$table, pfw, "Genotype")
+pooled <- er$anova[["Mean Sq"]][er$anova$SV == "Pooled error"]
+cmp("Eberhart-Russell (metan::ge_reg)", "slope", m$a$Slope, m$b$Slope)
+cmp("Eberhart-Russell (metan::ge_reg)", "s2di + pooled error / reps vs PBTools MSDev", m$a$`Deviation variance (s2di)` + pooled / 3, m$b$MSDev, tol = 1e-3)
+
 cell <- data.frame(GEN = factor(two$Genotype), ENV = factor(two$Env), Y = two$Yield_Mean)
 sg <- pb_shukla_gls(cell)
 psh <- suppressWarnings(PBToolsRD::pb_stability(two, "Yield_Mean", method = "shukla"))$table

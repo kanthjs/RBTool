@@ -12,6 +12,7 @@ observeEvent(input$go_gxe, {
   d <- gxe_dat()$d; a <- list(d, input$gxe_trait, input$gxe_geno, input$gxe_env, input$gxe_rep)
   r <- run_safe(withProgress(message = "Computing", value = 0.4, switch(input$gxe_kind,
     fw = do.call(pb_fw, a),
+    er = do.call(pb_er, a),
     shukla = { x <- do.call(pb_shukla, a); if (!isTRUE(input$shukla_pbtools)) x$pbtools <- NULL; x },
     stats = do.call(pb_stability_stats, a),
     ammi = do.call(pb_ammi, a),
@@ -22,11 +23,12 @@ observeEvent(input$go_gxe, {
 output$gxe_msg <- msg_ui("gxe", "Run GxE analysis")
 track_stale("gxe", "gxe", stale_extra$gxe)
 
-gxe_label <- c(fw = "Finlay-Wilkinson regression", shukla = "Shukla's stability variance", stats = "Stability statistics", ammi = "AMMI", gge = "GGE biplot")
+gxe_label <- c(fw = "Finlay-Wilkinson regression", er = "Eberhart-Russell regression", shukla = "Shukla's stability variance", stats = "Stability statistics", ammi = "AMMI", gge = "GGE biplot")
 gxe_tables <- function() {
   r <- rv$gxe; req(r)
   switch(r$kind,
-    fw = list(`Regression on the environment index` = r$table, `Environment index` = r$env_index, `ANOVA` = r$anova),
+    fw = list(`Regression on the environment index` = r$table, `Environment index` = r$env_index),
+    er = list(`Eberhart-Russell stability parameters` = r$table, `Joint regression ANOVA` = r$anova, `Environment index` = r$env_index),
     shukla = Filter(Negate(is.null), list(`Shukla's stability variance` = r$table, `PBTools model (nlme gls)` = if (is.data.frame(r$pbtools)) r$pbtools)),
     stats = list(`Stability statistics` = r$table, `Ranks` = r$ranks),
     ammi = list(`AMMI analysis of variance` = r$anova, `Scores` = r$scores),
@@ -35,6 +37,10 @@ gxe_tables <- function() {
 gxe_thai <- function(r) switch(r$kind,
   fw = { t <- r$table; sprintf("Finlay-Wilkinson: slope ของพันธุ์อยู่ระหว่าง %.2f ถึง %.2f พันธุ์ที่ตอบสนองต่อสภาพแวดล้อมดีมากที่สุดคือ %s (slope = %.2f) และพันธุ์ที่ตอบสนองน้อยที่สุดคือ %s (slope = %.2f) พันธุ์ที่ slope ต่างจาก 1 อย่างมีนัยสำคัญมี %d พันธุ์",
          min(t$Slope), max(t$Slope), t$Genotype[which.max(t$Slope)], max(t$Slope), t$Genotype[which.min(t$Slope)], min(t$Slope), sum(t$`p (b1 = 1)` < 0.05)) },
+  er = { t <- r$table; st <- t$Genotype[t$`Stable (Eberhart-Russell)` == "yes"]
+         sprintf("Eberhart-Russell (alpha = %.2f): พันธุ์ที่เสถียร (slope ไม่ต่างจาก 1 และ s2di ไม่ต่างจาก 0) มี %d พันธุ์%s; ตอบสนองต่อสภาพแวดล้อมดีมากกว่าค่าเฉลี่ย (b1 > 1) %d พันธุ์, น้อยกว่าค่าเฉลี่ย (b1 < 1) %d พันธุ์; ค่า s2di ต่างจาก 0 (ทำนายผลได้ยาก) %d พันธุ์",
+                 r$alpha, length(st), if (length(st)) paste0(" ได้แก่ ", paste(st[order(-t$Mean[match(st, t$Genotype)])], collapse = ", ")) else "",
+                 sum(t$Response == "above average (b1 > 1)"), sum(t$Response == "below average (b1 < 1)"), sum(t$Predictable == "no (s2di > 0)")) },
   shukla = { t <- r$table; sprintf("พันธุ์ที่เสถียรที่สุดตามค่า Shukla's stability variance (ค่าต่ำสุด) คือ %s และไม่เสถียรที่สุดคือ %s เมื่อพิจารณาทั้งผลผลิตและความเสถียร (ผลรวมลำดับของ Kang) พันธุ์ที่ดีที่สุดคือ %s",
              t$Genotype[which.min(t$`Shukla variance`)], t$Genotype[which.max(t$`Shukla variance`)], t$Genotype[which.min(t$`Sum of ranks (Kang)`)]) },
   stats = { t <- r$table; sprintf("ค่าเฉลี่ยสูงสุด: %s; Wricke ecovalence ต่ำสุด (เสถียร): %s; Annicchiarico สูงสุด: %s", t$Genotype[which.max(t$Mean)], t$Genotype[which.min(t$`Wricke ecovalence`)], t$Genotype[which.max(t$`Annicchiarico Wi (%)`)]) },
@@ -59,6 +65,12 @@ gxe_plot_obj <- reactive({
       ggplot2::ggplot(cl, ggplot2::aes(Index, Mean, colour = Genotype)) + ggplot2::geom_point(size = 1.6) +
         ggplot2::geom_abline(data = t, ggplot2::aes(intercept = Mean, slope = Slope, colour = Genotype)) +
         ggplot2::labs(x = "Environment index (site mean - grand mean)", y = r$trait, title = "Finlay-Wilkinson regression") + ggplot2::theme_minimal(base_size = 13) },
+    er = { t <- r$table
+      ggplot2::ggplot(t, ggplot2::aes(Slope, `Deviation variance (s2di)`, label = Genotype, colour = `Stable (Eberhart-Russell)`)) +
+        ggplot2::geom_vline(xintercept = 1, linetype = 2, colour = "grey50") + ggplot2::geom_point(size = 2.5) +
+        ggplot2::geom_text(vjust = -0.8, size = 3.3, check_overlap = TRUE, show.legend = FALSE) +
+        ggplot2::scale_colour_manual(values = c(yes = brand[["main"]], no = "grey55")) +
+        ggplot2::labs(x = "Slope b1", y = "Deviation from regression (s2di)", colour = "Stable", title = "Eberhart-Russell stability parameters") + ggplot2::theme_minimal(base_size = 13) },
     shukla = { t <- r$table
       ggplot2::ggplot(t, ggplot2::aes(Mean, `Shukla variance`, label = Genotype)) + ggplot2::geom_point(colour = brand[["main"]], size = 2.5) +
         ggplot2::geom_text(vjust = -0.8, size = 3.3, check_overlap = TRUE) + ggplot2::geom_vline(xintercept = mean(t$Mean), linetype = 2, colour = "grey50") +

@@ -16,9 +16,9 @@ Scripts: `scripts/pkg_compare_sea.R`, `scripts/pkg_compare_gxe.R` (data: RCB_ME,
 | Two-stage MET: variance components | lme4, statgenGxE `gxeVarComp` | identical |
 | Finlay-Wilkinson | metan `ge_reg` (Eberhart and Russell) | slopes identical (2e-15); PBTools MSDev = metan s2di + pooled error / reps |
 | Finlay-Wilkinson | statgenGxE `gxeFw` | slopes differ by up to 0.16: environment effects are estimated jointly, not taken as site means |
-| Shukla | metan `Shukla`, agricolae `stability.par` | **different definition**: PBTools fits `nlme::gls` with one residual variance per genotype (REML); the packages use Shukla's (1972) moment formula. Rank correlation 0.77 on the Two_stage data |
+| Shukla | metan `Shukla`, agricolae `stability.par` | **different definition**: PBTools fits `nlme::gls` with one residual variance per genotype (REML); the packages use Shukla's (1972) moment formula. Rank correlation 0.77 on the Two_stage data. metan and agricolae agree with each other on the same data (RCB_ME): identical ranks; agricolae = metan x reps (replicate-total scale) |
 | AMMI | agricolae `AMMI`, metan `performs_ammi` | % of GxE SS per PC and genotype scores identical; F of PCs differs slightly (PBTools uses the stage-1 pooled error, the packages the raw-data residual) |
-| GGE biplot | metan `gge` | % explained identical (40.1, 21.7, 17.4) |
+| GGE biplot | metan `gge` | % explained identical (40.1, 21.7, 17.4); statgenGxE `gxeGGE` identical too |
 | Extra stability indices (not in PBTools) | metan: Wricke ecovalence, Annicchiarico, superiority, WAASB, ...; statgenGxE `gxeStability` | - |
 | Pairwise comparisons | multcomp / emmeans | PBTools uses multcomp `glht` (already the case in the port) |
 

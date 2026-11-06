@@ -73,9 +73,15 @@ testServer(app, {
 
   # ---- GxE ----
   session$setInputs(gxe_src = "ex", gxe_example = "rcb11", gge_type = "1", gge_scaling = "none", gge_svp = "environment", ammi_type = "2", shukla_pbtools = TRUE)
-  for (k in c("fw", "shukla", "stats", "ammi", "gge")) {
+  for (k in c("fw", "er", "shukla", "stats", "ammi", "gge")) {
     go("go_gxe", gxe_kind = k, gxe_trait = "Yield", gxe_geno = "Genotype", gxe_env = "Env", gxe_rep = "Block")
     check(is.null(rv$gxe_err) && !is.null(output$gxe_plot), paste("GxE:", k, rv$gxe_err))
+    if (k == "er") {
+      t <- rv$gxe$table
+      check(all(t$`Stable (Eberhart-Russell)` == ifelse(t$`p (b1 = 1)` >= 0.05 & t$`p (s2di = 0)` >= 0.05, "yes", "no")) &&
+            "Joint regression ANOVA" %in% names(gxe_tables()), "GxE: Eberhart-Russell stable class and joint-regression ANOVA")
+      check(grepl("Eberhart and Russell", doc_text(output$dl_gxe_doc)), "GxE: Eberhart-Russell Word report")
+    }
   }
   check(grepl("PC1", doc_text(output$dl_gxe_doc)), "GxE: Word report")
   go("go_gxe", gxe_kind = "fw", gxe_trait = "Yield", gxe_geno = "Genotype", gxe_env = "Env", gxe_rep = "Genotype")

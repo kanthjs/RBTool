@@ -54,7 +54,7 @@ Open: (1) decompile the installed jar (`java -jar cfr-0.152.jar RJavaManager1.0.
 | `ssa.pairwise` | `pb_pairwise` | default `emmeans::contrast` (Tukey-Kramer, `dunnettx`); `method = "multcomp"`: `multcomp::glht` single-step, as PBTools; letters by `multcompView::multcompLetters` (not in PBTools) | multcomp: identical intervals with the same seed; emmeans: same pairs and differences, interval widths within 1% (identical for balanced data) |
 | `GEOneStage.test` | `pb_one_stage` | lme4, emmeans, `predict(re.form)` for GxE means | identical |
 | `GETwoStage.test` | `pb_two_stage` | lme4 with weights, emmeans | identical (in lme4 1.x terms, see below) |
-| `stability.analysis` regression | `pb_fw` | `metan::ge_reg` | identical slopes; metan reports s2di = PBTools MSDev - pooled error / reps |
+| `stability.analysis` regression | `pb_fw` (Finlay-Wilkinson), `pb_er` (Eberhart-Russell) | `metan::ge_reg` | identical slopes; metan reports s2di = PBTools MSDev - pooled error / reps (checked) |
 | `stability.analysis` shukla | `pb_shukla` | `metan::Shukla`; PBTools form with `nlme::gls(varIdent)` | PBTools form identical; metan uses Shukla's (1972) formula (different statistic) |
 | (not in PBTools) | `pb_stability_stats` | `metan::ge_stats` | - |
 | `ammi.analysis(2)` | `pb_ammi` | `metan::performs_ammi` | % per PC and scores identical; F of PCs slightly different (raw-data error vs stage-1 pooled error) |

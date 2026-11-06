@@ -13,18 +13,34 @@ pb_gxe_data <- function(data, trait, geno, env, rep) {
 }
 pb_metan <- function(expr) suppressMessages(suppressWarnings(expr))
 
-# Finlay-Wilkinson / Eberhart-Russell regression on the environmental index (metan::ge_reg). b1 is the PBTools slope.
-pb_fw <- function(data, trait, geno, env, rep) {
+# Regression of each genotype on the environmental index (site mean minus grand mean), both with metan::ge_reg:
+# Finlay-Wilkinson (1963): the slope b1 (the PBTools slope); Eberhart-Russell (1966): the slope b1 and the deviation
+# from regression s2di, with the joint-regression ANOVA. A genotype is stable in the Eberhart-Russell sense when b1 does
+# not differ from 1 and s2di does not differ from 0.
+pb_reg_fit <- function(data, trait, geno, env, rep) {
   d <- pb_gxe_data(data, trait, geno, env, rep)
   r <- pb_metan(metan::ge_reg(d, ENV, GEN, REP, Y, verbose = FALSE))$Y
-  g <- as.data.frame(r$regression)
-  tab <- data.frame(Genotype = g$GEN, Mean = g$b0, Slope = g$b1, `t (b1 = 1)` = as.numeric(g[["t(b1=1)"]]), `p (b1 = 1)` = as.numeric(g$pval_t),
-                    `Deviation variance (s2di)` = g$s2di, `F (s2di = 0)` = g[["F(s2di=0)"]], `p (s2di = 0)` = g$pval_f, R2 = g$R2, RMSE = g$RMSE, check.names = FALSE)
   cell <- stats::aggregate(Y ~ GEN + ENV, d, mean)
   idx <- stats::aggregate(Y ~ ENV, d, mean); idx$Index <- idx$Y - mean(d$Y)
   cell$Index <- idx$Index[match(cell$ENV, idx$ENV)]
-  list(table = tab, anova = as.data.frame(r$anova), cell = setNames(cell, c("Genotype", "Environment", "Mean", "Index")),
-       env_index = data.frame(Environment = idx$ENV, Mean = idx$Y, Index = idx$Index), trait = trait)
+  list(g = as.data.frame(r$regression), anova = as.data.frame(r$anova), cell = setNames(cell, c("Genotype", "Environment", "Mean", "Index")),
+       env_index = data.frame(Environment = idx$ENV, Mean = idx$Y, Index = idx$Index))
+}
+pb_fw <- function(data, trait, geno, env, rep) {
+  f <- pb_reg_fit(data, trait, geno, env, rep); g <- f$g
+  tab <- data.frame(Genotype = g$GEN, Mean = g$b0, Slope = g$b1, `t (b1 = 1)` = as.numeric(g[["t(b1=1)"]]), `p (b1 = 1)` = as.numeric(g$pval_t),
+                    R2 = g$R2, check.names = FALSE)
+  list(table = tab, cell = f$cell, env_index = f$env_index, trait = trait)
+}
+pb_er <- function(data, trait, geno, env, rep, alpha = 0.05) {
+  f <- pb_reg_fit(data, trait, geno, env, rep); g <- f$g
+  pt <- as.numeric(g$pval_t); pf <- as.numeric(g$pval_f)
+  resp <- ifelse(pt >= alpha, "average (b1 = 1)", ifelse(g$b1 > 1, "above average (b1 > 1)", "below average (b1 < 1)"))
+  tab <- data.frame(Genotype = g$GEN, Mean = g$b0, Slope = g$b1, `t (b1 = 1)` = as.numeric(g[["t(b1=1)"]]), `p (b1 = 1)` = pt,
+                    `Deviation variance (s2di)` = g$s2di, `F (s2di = 0)` = g[["F(s2di=0)"]], `p (s2di = 0)` = pf, R2 = g$R2, RMSE = g$RMSE,
+                    Response = resp, Predictable = ifelse(pf >= alpha, "yes (s2di = 0)", "no (s2di > 0)"),
+                    `Stable (Eberhart-Russell)` = ifelse(pt >= alpha & pf >= alpha, "yes", "no"), check.names = FALSE)
+  list(table = tab, anova = f$anova, cell = f$cell, env_index = f$env_index, alpha = alpha, trait = trait)
 }
 
 # Shukla's stability variance (Shukla 1972) with metan; and the model PBTools uses: residual variance per genotype of the

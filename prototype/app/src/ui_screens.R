@@ -78,10 +78,11 @@ met_ui <- sidebarLayout(
 gxe_ui <- sidebarLayout(
   sidebarPanel(
     side_step(1, "Analysis",
-      radioButtons("gxe_kind", NULL, c("Finlay-Wilkinson regression" = "fw", "Shukla's stability variance" = "shukla",
+      radioButtons("gxe_kind", NULL, c("Finlay-Wilkinson regression" = "fw", "Eberhart-Russell regression" = "er", "Shukla's stability variance" = "shukla",
                                        "Stability statistics (several indices)" = "stats", "AMMI" = "ammi", "GGE biplot" = "gge")),
       help_box("Which analysis?",
         p(strong("Finlay-Wilkinson:"), " regression of each genotype on the environment index (site mean minus grand mean). A slope near 1 means average response; above 1, the genotype gains more in good sites."),
+        p(strong("Eberhart-Russell:"), " the same slope plus the deviation from regression (s2di) and the joint-regression ANOVA. A genotype is stable when its slope does not differ from 1 and s2di does not differ from 0 (alpha = 0.05)."),
         p(strong("Shukla:"), " the share of the GxE interaction variance due to each genotype; small is stable."),
         p(strong("Stability statistics:"), " Wricke's ecovalence, Shukla, Eberhart-Russell, Annicchiarico, Lin and Binns superiority, ASV and WAASB in one table."),
         p(strong("AMMI and GGE:"), " split the interaction (GGE: genotype plus interaction) into principal components and show genotypes and sites on a biplot."))),
