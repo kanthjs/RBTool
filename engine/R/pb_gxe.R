@@ -86,7 +86,10 @@ pb_ammi <- function(data, trait, geno, env, rep) {
   r <- a$Y
   an <- as.data.frame(r$ANOVA); names(an)[names(an) == "Proportion"] <- "% of GxE"; names(an)[names(an) == "Accumulated"] <- "Cumulative %"
   sc <- as.data.frame(r$model); names(sc)[names(sc) == "Code"] <- "Name"; names(sc)[names(sc) == "Y"] <- "Mean"
-  list(anova = an, scores = sc, model = a, trait = trait)
+  ix <- tryCatch(as.data.frame(pb_metan(metan::ammi_indexes(a))$Y), error = function(e) NULL)
+  asv <- if (!is.null(ix)) data.frame(Genotype = as.character(ix$GEN), Mean = ix$Y, `Rank: mean` = ix$Y_R, ASV = ix$ASV, `Rank: ASV` = ix$ASV_R,
+                                      `Yield stability index (ssiASV)` = ix$ASV_SSI, check.names = FALSE)
+  list(anova = an, scores = sc, asv = asv, model = a, trait = trait)
 }
 
 # GGE biplot (metan::gge). centering "environment" = GGE; scaling "none" or "sd"; svp: singular value partitioning.
@@ -99,3 +102,57 @@ pb_gge <- function(data, trait, geno, env, rep, scaling = "none", svp = "environ
   list(explained = data.frame(PC = paste0("PC", seq_along(r$varexpl)), `% explained` = r$varexpl, check.names = FALSE),
        scores = sc, model = g, trait = trait)
 }
+
+# WAASB (Olivoto et al. 2019, metan::waasb): BLUP-based stability, the weighted average of the absolute scores of all
+# the principal components of the BLUP matrix of the GxE effects (genotype and GxE random). WAASBY combines the mean
+# and WAASB on 0-100 scales (metan's PctResp and PctWAASB); the app reweights them live with the same definition,
+# WAASBY = (PctResp x wY + PctWAASB x (100 - wY)) / 100.
+pb_waasb <- function(data, trait, geno, env, rep, higher = TRUE) {
+  d <- pb_gxe_data(data, trait, geno, env, rep)
+  w <- pb_metan(metan::waasb(d, ENV, GEN, REP, Y, mresp = if (higher) "h" else "l", wresp = 50, verbose = FALSE))
+  r <- w$Y; m <- as.data.frame(r$model)
+  g <- m[m$type == "GEN", ]; e <- m[m$type == "ENV", ]
+  tab <- data.frame(Genotype = as.character(g$Code), Mean = g$Y, WAASB = g$WAASB, `Mean (0-100)` = g$PctResp, `Stability (0-100)` = g$PctWAASB,
+                    `Rank: mean` = g$OrResp, `Rank: WAASB` = g$OrWAASB, check.names = FALSE)
+  pcs <- grep("^PC[0-9]+$", names(m), value = TRUE)
+  list(table = tab, env = data.frame(Environment = as.character(e$Code), Mean = e$Y, WAASB = e$WAASB),
+       lrt = as.data.frame(r$LRT), estimates = as.data.frame(r$ESTIMATES), pca = as.data.frame(r$PCA),
+       model = w, higher = higher, trait = trait)
+}
+
+# Multi-trait selection (Olivoto et al. 2019, 2021; metan): MTSI from the WAASBY of each trait (metan::mtsi), and MGIDI
+# from the genotype BLUPs or means (metan::mgidi), both selecting SI percent of the genotypes nearest the ideotype.
+# `lower`: traits for which lower values are better. Traits whose genotype BLUPs do not vary (no genetic variance) are
+# left out of MGIDI on BLUPs, with a note.
+pb_multi_trait <- function(data, traits, geno, env, rep, lower = character(), si = 15, wy = 50, mgidi_on = c("blup", "means")) {
+  mgidi_on <- match.arg(mgidi_on)
+  if (length(traits) < 2) stop("Choose at least two traits for multi-trait selection.", call. = FALSE)
+  safe <- paste0("T", seq_along(traits)); lab <- stats::setNames(traits, safe)
+  d0 <- pb_gxe_data(data, traits[1], geno, env, rep)        # checks the design on the first trait
+  d <- data.frame(ENV = pb_factor(data[[env]]), GEN = pb_factor(data[[geno]]), REP = pb_factor(data[[rep]]))
+  for (i in seq_along(traits)) d[[safe[i]]] <- pb_num(data[[traits[i]]])
+  d <- droplevels(d[stats::complete.cases(d), ])
+  if (any(table(d$GEN, d$ENV) == 0)) stop("Every genotype must have all the traits in every environment (rows with a missing trait are left out).", call. = FALSE)
+  ide <- ifelse(traits %in% lower, "l", "h")
+  w <- pb_metan(metan::waasb(d, ENV, GEN, REP, dplyr::all_of(safe), mresp = ide, wresp = rep(wy, length(safe)), verbose = FALSE))
+  relabel <- function(x) { x <- as.data.frame(x); for (k in names(x)) if (is.character(x[[k]]) || is.factor(x[[k]])) { v <- as.character(x[[k]]); i <- v %in% safe; v[i] <- lab[v[i]]; x[[k]] <- v }
+                           names(x) <- ifelse(names(x) %in% safe, lab[names(x)], names(x)); x }
+  mt <- pb_metan(metan::mtsi(w, SI = si, verbose = FALSE))
+  gm <- if (mgidi_on == "blup") as.data.frame(pb_metan(metan::gmd(w, "blupg", verbose = FALSE)))
+        else { a <- stats::aggregate(d[safe], list(GEN = d$GEN), mean); a$GEN <- as.character(a$GEN); a }
+  keep <- safe[vapply(safe, function(s) { x <- gm[[s]]; stats::sd(x) > 1e-8 * max(1, abs(mean(x))) }, NA)]
+  dropped <- unname(lab[setdiff(safe, keep)])
+  mg <- if (length(keep) >= 2) pb_metan(metan::mgidi(gm[c("GEN", keep)], SI = si, ideotype = ide[match(keep, safe)], verbose = FALSE))
+  gmeans <- stats::aggregate(d[safe], list(Genotype = as.character(d$GEN)), mean); names(gmeans)[-1] <- traits
+  list(mtsi = mt, mgidi = mg, model = w, traits = traits, gen_means = gmeans, lower = lower, si = si, wy = wy, mgidi_on = mgidi_on, dropped = dropped,
+       mtsi_table = data.frame(Genotype = mt$MTSI$Genotype, MTSI = mt$MTSI$MTSI, Selected = ifelse(mt$MTSI$Genotype %in% mt$sel_gen, "yes", "")),
+       mtsi_dif = relabel(mt$sel_dif_trait),
+       mgidi_table = if (!is.null(mg)) data.frame(Genotype = mg$MGIDI$Genotype, MGIDI = mg$MGIDI$MGIDI, Selected = ifelse(mg$MGIDI$Genotype %in% mg$sel_gen, "yes", "")),
+       mgidi_dif = if (!is.null(mg)) relabel(mg$sel_dif),
+       mgidi_contri = if (!is.null(mg)) relabel(mg$contri_fac),
+       relabel = relabel)
+}
+
+# WAASBY over weighting scenarios (metan::wsmp): the ranks of the genotypes when the weight of the mean goes from 0 to
+# 100 percent in steps of 5 (Olivoto et al. 2019, Fig. of the WAASY scenarios). higher: larger trait values are better.
+pb_wsmp <- function(model, higher = TRUE) pb_metan(metan::wsmp(model, mresp = if (higher) 100 else 0, progbar = FALSE))

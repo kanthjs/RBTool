@@ -86,6 +86,52 @@ pb_sea <- function(data, traits, geno, design = "RCB", block, column = NULL, rep
   res
 }
 
+# Standard (fixed-effect) analysis of variance of an RCBD, per trait and environment: y = block + genotype + error,
+# fitted with stats::lm (blocks fixed), sequential sums of squares (stats::anova; block first, so genotype is adjusted
+# for blocks when plots are missing). Means and SE from emmeans; LSD = t(0.975, error df) x average SED; CV = sqrt(MSE) / mean.
+# The lm models feed the same Tukey / Dunnett comparisons (emmeans or multcomp) as the mixed-model analysis.
+pb_sea_anova <- function(data, traits, geno, block, env = NULL) {
+  env <- pb_null_if_empty(env)
+  pb_check_cols(data, traits, geno, block, env)
+  data <- as.data.frame(data)
+  desc <- pb_descriptive(data, traits, env)
+  if (is.null(env)) { env <- ".env"; data[[env]] <- "1" }
+  data[[env]] <- pb_factor(data[[env]])
+  out <- list(summary = list(), anova = list(), means = list(), diag = list(), formulas = list(), models = list(), sed = list())
+  for (tr in traits) for (e in levels(data[[env]])) {
+    d <- data[data[[env]] == e, , drop = FALSE]; n_read <- nrow(d)
+    d[[tr]] <- pb_num(d[[tr]]); d <- d[!is.na(d[[tr]]), , drop = FALSE]
+    for (v in c(geno, block)) d[[v]] <- pb_factor(d[[v]])
+    if (nrow(d) < 3 || nlevels(d[[geno]]) < 2) stop(sprintf("Too few observations of %s in environment %s.", tr, e), call. = FALSE)
+    f1 <- sprintf("`%s` ~ `%s` + `%s`", tr, block, geno)
+    m <- stats::lm(stats::as.formula(f1), data = d)
+    a <- as.data.frame(stats::anova(m))
+    an <- data.frame(Trait = tr, Environment = e, Source = c("Block", "Genotype", "Error"), Df = a$Df, `Sum Sq` = a$`Sum Sq`,
+                     `Mean Sq` = a$`Mean Sq`, `F value` = a$`F value`, `Pr(>F)` = a$`Pr(>F)`, check.names = FALSE)
+    an <- rbind(an, data.frame(Trait = tr, Environment = e, Source = "Total", Df = sum(a$Df), `Sum Sq` = sum(a$`Sum Sq`),
+                               `Mean Sq` = NA, `F value` = NA, `Pr(>F)` = NA, check.names = FALSE))
+    emm <- emmeans::emmeans(m, geno)
+    bl <- as.data.frame(emm); bl <- data.frame(Genotype = as.character(bl[[geno]]), Mean = bl$emmean, SE = bl$SE)
+    V <- stats::vcov(emm); vv <- diag(V); sed <- sqrt(outer(vv, vv, "+") - 2 * V)[upper.tri(V)]
+    mse <- a$`Mean Sq`[3]; dfe <- a$Df[3]; gm <- mean(d[[tr]])
+    key <- paste(tr, "|", e)
+    out$anova[[key]] <- an
+    out$means[[key]] <- cbind(Trait = tr, Environment = e, bl)
+    out$models[[key]] <- m
+    out$sed[[key]] <- data.frame(Trait = tr, Environment = e, Minimum = min(sed), Average = mean(sed), Maximum = max(sed))
+    out$summary[[key]] <- data.frame(Trait = tr, Environment = e, `N read` = n_read, `N used` = nrow(d), Reps = pb_harmonic(table(d[[geno]])),
+      `Grand mean` = gm, `Error mean square` = mse, `CV (%)` = 100 * sqrt(mse) / gm, `F (genotype)` = a$`F value`[2], `P (genotype)` = a$`Pr(>F)`[2],
+      `Average SED` = mean(sed), `LSD (5%)` = stats::qt(0.975, dfe) * mean(sed), check.names = FALSE)
+    out$diag[[key]] <- pb_diag_frame(m, tr, e)
+    out$formulas[[key]] <- gsub("`", "", f1)
+  }
+  res <- lapply(out[c("summary", "anova", "means", "diag", "sed")], pb_bind)
+  res$models <- out$models; res$formulas <- unlist(out$formulas); res$descriptive <- desc
+  res$random <- FALSE; res$design <- "RCB"; res$method <- "anova"; res$single_env <- identical(env, ".env")
+  if (res$single_env) for (k in c("summary", "anova", "means", "diag", "sed")) if (!is.null(res[[k]])) res[[k]]$Environment <- NULL
+  res
+}
+
 # Stage-1 table for the two-stage and stability analyses: per environment the BLUEs of the genotypes (genotype fixed),
 # their SE, the error variance and the harmonic mean of the number of replicates, as PBTools builds it.
 pb_stage1 <- function(data, trait, geno, design = "RCB", block, column = NULL, rep = NULL, env) {

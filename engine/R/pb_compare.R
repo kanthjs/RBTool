@@ -43,12 +43,14 @@ pb_pairwise <- function(models, geno, type = c("Tukey", "Dunnett"), alpha = 0.05
 
 # both helpers return Genotype i, Genotype j, Difference (i - j), Lower, Upper; Dunnett: j is the control
 pb_pairs_emmeans <- function(m, geno, type, alpha, control, lv) {
-  emm <- emmeans::emmeans(m, geno, lmer.df = "asymptotic")
+  emm <- suppressMessages(emmeans::emmeans(m, geno, lmer.df = "asymptotic"))
   ct <- if (type == "Tukey") emmeans::contrast(emm, "revpairwise", adjust = "tukey")
         else emmeans::contrast(emm, "trt.vs.ctrl", ref = match(control, lv), adjust = "dunnettx")
   ci <- as.data.frame(stats::confint(ct, level = 1 - alpha, adjust = if (type == "Tukey") "tukey" else "dunnettx"))
   pr <- strsplit(as.character(ci$contrast), " - ", fixed = TRUE)
-  lo <- grep("LCL$", names(ci), value = TRUE); up <- grep("UCL$", names(ci), value = TRUE)
+  # emmeans writes numeric-looking levels with the factor name in front ("Gen2 - Gen1"); take it off
+  pr <- lapply(pr, function(x) ifelse(x %in% lv, x, substring(x, nchar(geno) + 1)))
+  lo <- grep("LCL$|lower.CL$", names(ci), value = TRUE); up <- grep("UCL$|upper.CL$", names(ci), value = TRUE)
   data.frame(`Genotype i` = vapply(pr, `[`, "", 1), `Genotype j` = vapply(pr, `[`, "", 2), Difference = ci$estimate,
              Lower = ci[[lo]], Upper = ci[[up]], check.names = FALSE)
 }
@@ -77,4 +79,28 @@ pb_diag_plot <- function(diag, note = NULL) {
            if (!is.null(sw)) sprintf("Shapiro-Wilk test of the residuals:\nW = %.3f, p = %s", sw$statistic, format.pval(sw$p.value, digits = 3)))
   graphics::text(0.5, 0.5, paste(txt, collapse = "\n\n"), cex = 0.95)
   invisible(NULL)
+}
+
+# Classic multiple comparisons on the fixed-effect ANOVA models (lm): Fisher's LSD and Duncan's multiple range test
+# (DMRT), with agricolae::LSD.test and agricolae::duncan.test. The error mean square and df are those of the model, so
+# for the combined ANOVA with environments random (model of the GxE cell means) they are the GxE mean square / r.
+pb_classic_compare <- function(models, geno, type = c("LSD", "DMRT"), alpha = 0.05) {
+  type <- match.arg(type)
+  if (!length(models)) stop("There is no ANOVA model to compare.", call. = FALSE)
+  if (!all(vapply(models, inherits, NA, "lm") & !vapply(models, inherits, NA, "merMod")))
+    stop("LSD and DMRT are given with the Standard ANOVA (single environment) or the Combined ANOVA (multi-environment). Choose that method and run again, or use Tukey / Dunnett.", call. = FALSE)
+  letters <- list(); stats <- list()
+  for (nm in names(models)) {
+    m <- models[[nm]]
+    x <- if (type == "DMRT") agricolae::duncan.test(m, geno, alpha = alpha, group = TRUE)
+         else agricolae::LSD.test(m, geno, alpha = alpha, p.adj = "none", group = TRUE)
+    g <- x$groups
+    letters[[nm]] <- data.frame(Model = nm, Genotype = rownames(g), Mean = g[[1]], Group = trimws(as.character(g$groups)))
+    st <- x$statistics
+    stats[[nm]] <- data.frame(Model = nm, `Error mean square` = st$MSerror, `Error df` = st$Df,
+                              Critical = if (type == "DMRT") sprintf("%.4g to %.4g", min(x$duncan$CriticalRange), max(x$duncan$CriticalRange)) else if (is.null(st$LSD)) "differs between pairs (unequal replication)" else sprintf("%.4g", st$LSD),
+                              check.names = FALSE)
+    names(stats[[nm]])[4] <- if (type == "DMRT") "Critical range (2 to p means)" else "LSD"
+  }
+  list(table = NULL, letters = pb_bind(letters), stats = pb_bind(stats), type = type, alpha = alpha, classic = TRUE, warning = character())
 }

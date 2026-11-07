@@ -6,7 +6,7 @@ library(shiny)
 
 # Packages used by the engine and the app; this block (never run) lets Shinylive see that they must be bundled
 if (FALSE) {
-  lme4::lmer; emmeans::emmeans; multcomp::glht; multcompView::multcompLetters; nlme::gls; metan::ge_reg
+  lme4::lmer; emmeans::emmeans; multcomp::glht; multcompView::multcompLetters; nlme::gls; metan::ge_reg; agricolae::duncan.test
   readxl::read_excel; writexl::write_xlsx; ggplot2::ggplot; jsonlite::base64_enc; htmltools::htmlEscape
 }
 engine_dir <- if (dir.exists("engine")) "engine" else file.path("..", "..", "engine", "R")
@@ -18,6 +18,7 @@ source("src/helpers.R", local = TRUE)
 source("src/style.R", local = TRUE)       # brand colours and CSS (from RDstat)
 source("src/data.R", local = TRUE)        # examples, data step, variable pickers
 source("src/ui_screens.R", local = TRUE)  # the three analysis screens
+source("src/gxe_interpret.R", local = TRUE) # Thai reading of the AMMI and GGE biplots
 source("report.R", local = TRUE)          # Word report, method paragraphs
 
 home_ui <- div(class = "container", style = "max-width: 1040px;",
@@ -32,12 +33,12 @@ home_ui <- div(class = "container", style = "max-width: 1040px;",
               "รวมหลายสถานที่ในโมเดลเดียว (one-stage) หรือรวมค่าเฉลี่ยของแต่ละสถานที่ (two-stage) ทดสอบปฏิสัมพันธ์พันธุ์ × สถานที่",
               "BLUE / BLUP รวมทุกสถานที่ · heritability · กราฟปฏิสัมพันธ์"),
     home_card("home_gxe", "chart-line", "G×E และความเสถียร",
-              "พันธุ์ใดให้ผลสูงและเสถียร Finlay-Wilkinson, Shukla, ดัชนีความเสถียรหลายแบบ, AMMI และ GGE biplot",
+              "พันธุ์ใดให้ผลสูงและเสถียร: Finlay-Wilkinson, Eberhart-Russell, Shukla, AMMI, GGE biplot และคัดเลือกพันธุ์ด้วย WAASB / WAASBY และหลายลักษณะ (MTSI / MGIDI)",
               "ต้องมีข้อมูลทุกพันธุ์ในทุกสถานที่ พร้อมซ้ำ")),
   h4("ใช้งานอย่างไร"),
   div(class = "steps",
     home_step(1, "เลือกการวิเคราะห์", "จากการ์ดด้านบน หรือเมนูด้านบนของหน้า"),
-    home_step(2, "เลือกข้อมูล", "เริ่มด้วยข้อมูลตัวอย่าง หรืออัปโหลด .csv / .xlsx หนึ่งแถวต่อหนึ่งแปลง มีคอลัมน์พันธุ์ สถานที่ บล็อก/ซ้ำ และลักษณะที่วัด"),
+    home_step(2, "เลือกข้อมูล", "เริ่มด้วยข้อมูลตัวอย่าง หรืออัปโหลด .csv / .xlsx / .xls หนึ่งแถวต่อหนึ่งแปลง มีคอลัมน์พันธุ์ สถานที่ บล็อก/ซ้ำ และลักษณะที่วัด"),
     home_step(3, "กด Run แล้วดูผล", "ตาราง กราฟ ตรวจสมมติฐาน และดาวน์โหลด Excel หรือรายงาน Word")),
   div(class = "alert alert-light border d-flex gap-2 align-items-start", icon("lock"),
       span("ข้อมูลของคุณถูกวิเคราะห์ในเบราว์เซอร์ของคุณเท่านั้น ไม่ได้ถูกส่งไปยังเซิร์ฟเวอร์ใด")))
@@ -66,8 +67,14 @@ server <- function(input, output, session) {
   source("src/server_sea.R", local = TRUE)
   source("src/server_met.R", local = TRUE)
   source("src/server_gxe.R", local = TRUE)
-  output$methods_versions <- renderUI(p(sprintf("%s %s, R %s.%s; lme4 %s, emmeans %s, multcomp %s, nlme %s, metan %s.", app_name, version_label(),
-    R.version$major, R.version$minor, pkg_ver("lme4"), pkg_ver("emmeans"), pkg_ver("multcomp"), pkg_ver("nlme"), pkg_ver("metan"))))
+  output$methods_text <- renderUI(methods_packages_ui())
+  output$methods_topics <- renderUI(methods_topics_ui())
+  for (t in method_topics) local({ tp <- t
+    observeEvent(input[[paste0("cp_topic_", tp$id)]], session$sendCustomMessage("copy_text", list(what = tp$title, text = topic_copy_text(tp)))) })
+  observeEvent(input$cp_refs, session$sendCustomMessage("copy_text", list(what = "Software references", text = paste(package_refs(), collapse = "
+"))))
+  observeEvent(input$cp_mrefs, session$sendCustomMessage("copy_text", list(what = "Method references", text = paste(method_refs, collapse = "
+"))))
 }
 
 shinyApp(ui, server)

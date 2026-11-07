@@ -58,6 +58,13 @@ app_css <- css_fill(
     details.help-box { margin: 4px 0 12px; font-size: 13px; }
     details.help-box summary { cursor: pointer; color: #6e5c5d; font-weight: 500; }
     details.help-box summary:hover { color: %1$s; }
+    .radio-group-title { font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: %1$s; margin: 10px 0 4px; padding-bottom: 2px; border-bottom: 1px solid #f0e6e6; }
+    .shiny-options-group > .radio-group-title:first-child { margin-top: 0; }
+    .layout-help { background: #faf6f6; border: 1px solid #efe6e6; border-radius: 8px; padding: 8px 10px; }
+    .layout-table { font-size: 11.5px; border-collapse: collapse; margin: 2px 0 8px; width: 100%%; background: #fff; }
+    .layout-table th { background: #f2eaea; color: %2$s; font-weight: 600; }
+    .layout-table th, .layout-table td { border: 1px solid #e6dcdc; padding: 2px 5px; text-align: center; white-space: nowrap; }
+    .layout-rules { padding-left: 18px; margin-bottom: 6px; font-size: 12.5px; } .layout-rules li { margin-bottom: 3px; }
     .help-body { padding: 6px 0 6px 10px; border-left: 2px solid #e8e0e0; margin-top: 4px; color: #555; }
     details.plot-labels { margin-bottom: 12px; } details.plot-labels summary { cursor: pointer; color: #6e5c5d; margin-bottom: 8px; font-size: 13.5px; }
     

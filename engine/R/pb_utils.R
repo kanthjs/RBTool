@@ -25,7 +25,7 @@ pb_bind <- function(l) {
 
 pb_read_table <- function(path, name = path) {
   ext <- tolower(tools::file_ext(name))
-  d <- if (ext %in% c("xlsx", "xls")) as.data.frame(readxl::read_excel(path))
+  d <- if (ext %in% c("xlsx", "xls")) as.data.frame(readxl::read_excel(path, na = c("", "NA", ".")))
        else if (ext %in% c("txt", "tsv")) utils::read.delim(path, check.names = FALSE, na.strings = c("NA", "", "."))
        else utils::read.csv(path, check.names = FALSE, na.strings = c("NA", "", "."))
   names(d) <- trimws(names(d))

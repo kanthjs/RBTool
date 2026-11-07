@@ -37,3 +37,13 @@ Conclusion: no single package reproduces PBTools across the whole menu. The engi
 (+ multcomp / multcompView) for the PBTools mixed models and uses metan for GxE and stability. Worth adding later:
 metan's WAASB and MTSI / MGIDI (multi-trait selection indices), statgenSTA's spatial models (SpATS), and agricolae's
 LSD / Duncan letters for users who want the classic fixed-block ANOVA view.
+
+## Bundle size and load time (2026-11-07)
+
+`shinylive::export()` (shinylive 0.5.0) after adding agricolae (LSD, DMRT) and the metan WAASB / MTSI / MGIDI screens:
+71 packages, 86 MB of webR packages (152 MB with the webR runtime); agricolae and its one extra dependency AlgDesign
+add 1.4 MB. Served from the local disk into a fresh browser cache, the app was ready in about 22 s; this excludes the
+network, so the deployed site (78 s measured on 2026-11-06 with the pane hidden) should be re-timed after the next
+deployment. In webR: single-environment standard ANOVA of 11 sites 11 s; first DMRT 9 s (loads agricolae); MTSI and
+MGIDI on 5 traits about 12 s after the packages are loaded. Export warnings: installed readxl, lattice and mvtnorm are
+newer than their webR builds (the webR builds are used).
