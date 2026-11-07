@@ -3,7 +3,7 @@ name: Deploy prototype to GitHub Pages
 on:
   push:
     branches: [main]
-    paths: ["prototype/**", "engine/**", "scripts/build_app.R", ".github/workflows/pages.yml"]
+    paths: ["prototype/**", "engine/**", "scripts/build_app.R", "scripts/export_site.R", ".github/workflows/pages.yml"]
   workflow_dispatch:
 
 permissions:
@@ -24,7 +24,7 @@ jobs:
         with:
           use-public-rspm: true
       - name: Install packages
-        run: Rscript -e 'install.packages(c("shiny", "bslib", "shinylive", "lme4", "emmeans", "multcomp", "multcompView", "nlme", "metan", "agricolae", "ggplot2", "readxl", "writexl", "jsonlite", "htmltools"))'
+        run: Rscript -e 'install.packages(c("shiny", "bslib", "shinylive", "lme4", "emmeans", "multcomp", "multcompView", "nlme", "metan", "agricolae", "ggplot2", "readxl", "writexl", "jsonlite", "htmltools", "png"))'
       - name: Copy engine into the app
         run: Rscript scripts/build_app.R
         env:
@@ -32,7 +32,7 @@ jobs:
       - name: Test the app (deploy stops if a test fails)
         run: Rscript prototype/tests/test_server.R
       - name: Export Shinylive site
-        run: Rscript -e 'shinylive::export("prototype/app", "_site")'
+        run: Rscript scripts/export_site.R _site
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site

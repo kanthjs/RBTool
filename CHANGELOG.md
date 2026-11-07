@@ -6,6 +6,7 @@ All notable changes to RBTool. Dates are when the change was made; versions foll
 ## Unreleased
 
 ### Added (2026-11-07)
+- Loading screen as in RDstat (`prototype/loading_screen.html`, put into the site by the new `scripts/export_site.R`): RBTool name and colours, progress bar estimated from the last load in the browser, seconds elapsed and left, the three loading steps, a note that the data stay in the browser, and a hint when it takes over 3 minutes. CI exports with this script and installs `png`, which the server tests need (deploy run #6 stopped there).
 - GGE biplot: all ten metan views (basic, mean vs. stability, which-won-where, discriminativeness vs. representativeness, examine an environment, ranking environments, examine a genotype, ranking genotypes, compare two genotypes, relationship among environments), chosen on the Plot tab with pickers for the environment / genotypes, label and point size, and a help box on reading each view. AMMI: nominal yield vs. environment PC1 added.
 - Live View plots (as RDstat) on every Plot tab: the plot is drawn at the proportions of the file that will be downloaded; size presets (standard, square, journal 1 and 2 columns, slide, custom cm with a text-size slider) and PNG / SVG / PDF download.
 - Thai reading of the AMMI (ANOVA shares, AMMI1, AMMI2, ASV and ssiASV from metan::ammi_indexes) and GGE results (which-won-where mega-environments, mean vs. stability, ideal genotype and environment, environment correlations); also in the Word report. AMMI stability indexes table.
