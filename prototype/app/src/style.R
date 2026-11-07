@@ -1,6 +1,8 @@
 # Bootstrap 5 through bslib. bs_theme(version = 5) with no Sass variables changed is served precompiled, so the
 # browser does not compile Sass when the app opens; the colours of this app are set in app_css instead.
 brand <- c(main = "#A61C1C", dark = "#7A1212", light = "#F8F4F4")
+# Google Sans (from Google Fonts, Latin and Thai); Chulabhorn Likit, bundled in www/fonts, is the fallback when it cannot load
+google_sans_link <- tags$link(rel = "stylesheet", href = "https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600;700&display=swap")
 # sprintf() refuses format strings over 8192 characters, so the brand colours are filled in by css_fill()
 css_fill <- function(x, ...) {
   a <- c(...)
@@ -12,7 +14,7 @@ css_fill <- function(x, ...) {
 app_css <- css_fill(
   "@font-face { font-family: 'Chulabhorn Likit'; src: url('fonts/ChulabhornLikitText-Regular.ttf') format('truetype'); font-weight: normal; }
     @font-face { font-family: 'Chulabhorn Likit'; src: url('fonts/ChulabhornLikitText-Bold.ttf') format('truetype'); font-weight: bold; }
-    :root { --bs-body-font-family: 'Chulabhorn Likit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    :root { --bs-body-font-family: 'Google Sans', 'Chulabhorn Likit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             --bs-body-font-size: 15px;
             --bs-primary: %1$s; --bs-primary-rgb: 166, 28, 28;
             --bs-link-color: %1$s; --bs-link-color-rgb: 166, 28, 28;

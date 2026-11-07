@@ -49,7 +49,7 @@ ui <- bslib::page_navbar(
   title = tags$span(icon("seedling"), app_name, tags$span(class = "badge bg-light text-danger", "beta")), window_title = app_name, id = "nav",
   theme = bslib::bs_theme(version = 5), fillable = FALSE, lang = "th",
   navbar_options = bslib::navbar_options(bg = brand[["main"]], theme = "dark"),
-  header = tags$head(tags$script(HTML(copy_js)), tags$script(HTML(stale_js)), tags$style(HTML(app_css)), useBusyIndicators()),
+  header = tags$head(google_sans_link, tags$script(HTML(copy_js)), tags$script(HTML(stale_js)), tags$style(HTML(app_css)), useBusyIndicators()),
   tabPanel("Home", home_ui),
   tabPanel("Single environment", sea_ui, value = "sea"),
   tabPanel("Multi-environment", met_ui, value = "met"),

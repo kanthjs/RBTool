@@ -11,7 +11,8 @@
        3. app:   the app's navbar is drawn in the frame (done)
      Each step's expected time is how long it took on the last load in this browser (localStorage), or a first-visit
      guess; the bar gives each step a share in proportion to it, so it moves at about one pace through the whole load.
-     The text is in the app's font, Chulabhorn Likit, which scripts/export_site.R copies to <site>/fonts. -->
+     The text is in the app's font, Google Sans (Google Fonts), falling back to Chulabhorn Likit, which scripts/export_site.R copies to <site>/fonts. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600;700&display=swap">
 <style>
   @font-face { font-family: "Chulabhorn Likit"; src: url("fonts/ChulabhornLikitText-Regular.ttf") format("truetype");
                font-weight: normal; font-display: swap; }
@@ -20,7 +21,7 @@
   #rd-loading {
     position: fixed; inset: 0; z-index: 10000; display: flex; align-items: center; justify-content: center;
     background: #FBFAFA; color: #1D1F21; transition: opacity .3s;
-    font-family: "Chulabhorn Likit", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: "Google Sans", "Chulabhorn Likit", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   }
   #rd-loading.rd-done { opacity: 0; pointer-events: none; }
   #rd-loading .rd-card {
