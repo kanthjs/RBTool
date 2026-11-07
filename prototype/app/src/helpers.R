@@ -22,12 +22,19 @@ fmt_df <- function(d, p_cols = c("P", "P (genotype)", "p (b1 = 1)", "p (s2di = 0
     x <- d[[j]]
     if (is.factor(x)) d[[j]] <- as.character(x)
     else if (is.logical(x)) d[[j]] <- ifelse(is.na(x), "", ifelse(x, "yes", "no"))
-    else if (is.numeric(x)) d[[j]] <- if (j %in% p_cols) fmt_p(x) else vapply(x, function(v) {
-      if (is.na(v)) "" else if (v == round(v) && abs(v) < 1e9) formatC(v, format = "d", big.mark = ",")
-      else if (abs(v) >= 100) formatC(v, format = "f", digits = 2, big.mark = ",")
-      else formatC(v, format = "fg", digits = 4) }, "")
+    else if (is.numeric(x)) d[[j]] <- if (j %in% p_cols) fmt_p(x) else fmt_num(x)
   }
   d
+}
+# whole numbers with thousands separators, |x| >= 100 with 2 decimals, the rest with 4 significant digits; NA as ""
+# (vectorised: one formatC call per kind instead of one per cell)
+fmt_num <- function(x) {
+  out <- character(length(x)); ok <- !is.na(x)
+  int <- ok & x == round(x) & abs(x) < 1e9; big <- ok & !int & abs(x) >= 100; rest <- ok & !int & !big
+  out[int] <- formatC(x[int], format = "d", big.mark = ",")
+  out[big] <- formatC(x[big], format = "f", digits = 2, big.mark = ",")
+  out[rest] <- formatC(x[rest], format = "fg", digits = 4)
+  out
 }
 tsv <- function(df) paste(c(paste(names(df), collapse = "\t"), apply(df, 1, paste, collapse = "\t")), collapse = "\n")
 
@@ -35,16 +42,19 @@ tsv <- function(df) paste(c(paste(names(df), collapse = "\t"), apply(df, 1, past
 html_table <- function(df, max_rows = 400) {
   if (is.null(df) || !nrow(df)) return(p(class = "text-muted", "(no rows)"))
   more <- nrow(df) > max_rows; df <- utils::head(df, max_rows)
-  num <- vapply(seq_along(df), function(j) {
-    v <- as.character(df[[j]]); v <- v[nzchar(v)]
-    length(v) > 0 && all(grepl("^[-<]?[0-9][0-9,.]*[*]*$|^[-]?[0-9.]+e[-+][0-9]+$", v))
-  }, NA)
+  cols <- lapply(df, as.character)
+  num <- vapply(cols, function(v) { v <- v[nzchar(v)]
+    length(v) > 0 && all(grepl("^[-<]?[0-9][0-9,.]*[*]*$|^[-]?[0-9.]+e[-+][0-9]+$", v)) }, NA, USE.NAMES = FALSE)
   al <- ifelse(num, "text-align:right;", "text-align:left;")
+  # the cells of each row as one HTML string, the markup tags$td() writes, built column by column: building one tag
+  # object per cell with df[i, j] took about 10 times as long
+  td <- lapply(seq_along(cols), function(j)
+    paste0("<td style=\"", al[j], "\"", if (num[j]) " class=\"num\"", ">", htmltools::htmlEscape(cols[[j]]), "</td>"))
+  rows <- do.call(paste, c(td, sep = "\n"))
   div(class = "table-responsive",
     tags$table(class = "table table-condensed table-striped", style = "width:auto;",
       tags$thead(tags$tr(lapply(seq_along(df), function(j) tags$th(names(df)[j], style = al[j])))),
-      tags$tbody(lapply(seq_len(nrow(df)), function(i)
-        tags$tr(lapply(seq_along(df), function(j) tags$td(as.character(df[i, j]), style = al[j], class = if (num[j]) "num")))))),
+      tags$tbody(lapply(rows, function(r) tags$tr(HTML(r))))),
     if (more) p(class = "text-muted small", sprintf("Showing the first %d rows; the Excel file has all of them.", max_rows)))
 }
 data_preview_ui <- function(d, n = 10) {

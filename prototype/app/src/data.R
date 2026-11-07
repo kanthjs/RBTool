@@ -54,6 +54,13 @@ layout_help <- function(page) {
 # the file a template link downloads
 template_file <- c(sea = "rcb_2sites.csv", met = "rcb_11sites.csv", gxe = "rcb_11sites.csv")
 
+# an example file is read the first time it is used, then kept for every screen and session of this R process
+example_cache <- new.env()
+example_data <- function(k) {
+  if (is.null(example_cache[[k]])) example_cache[[k]] <- utils::read.csv(file.path("examples", examples[[k]]$file), check.names = FALSE)
+  example_cache[[k]]
+}
+
 # reactive data of one screen: list(d = data frame, name, ex = example roles or NULL)
 data_server <- function(input, p) reactive({
   if (identical(input[[paste0(p, "_src")]], "up")) {
@@ -63,7 +70,7 @@ data_server <- function(input, p) reactive({
     list(d = d, name = f$name, ex = NULL)
   } else {
     k <- input[[paste0(p, "_example")]] %||% names(examples)[1]; e <- examples[[k]]
-    list(d = utils::read.csv(file.path("examples", e$file), check.names = FALSE), name = e$label, ex = e)
+    list(d = example_data(k), name = e$label, ex = e)
   }
 })
 

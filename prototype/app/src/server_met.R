@@ -9,9 +9,13 @@ observeEvent(input$met_example, {
 })
 met_file_mode <- reactive(input$met_method == "two" && identical(input$met_s1, "file"))
 
+# what the pickers depend on; a reactiveVal does not invalidate when set to the same value, so switching between
+# combined ANOVA and one-stage keeps the variables already chosen
+met_vars_mode <- reactiveVal(NULL)
+observe({ req(input$met_method); met_vars_mode(list(file = met_file_mode(), design = input$met_design, multi = input$met_method != "two")) })
 output$met_vars <- renderUI({
-  dat <- met_dat()
-  if (met_file_mode()) {
+  dat <- met_dat(); mode <- met_vars_mode(); req(mode)
+  if (mode$file) {
     d <- dat$d; cl <- names(d); e <- dat$ex; num <- numeric_like(d)
     tagList(role_select("met_s1geno", "Genotype", cl, e$geno, "gen|entry|line"),
             role_select("met_s1env", "Environment", cl, e$env, "^env|site|loc"),
@@ -19,7 +23,7 @@ output$met_vars <- renderUI({
             role_select("met_s1se", "SE of the mean (for weights)", num, e$se, "stderr|_se|^se", optional = TRUE),
             role_select("met_s1err", "Error variance of the site", num, e$error_var, "sigma2|error|var"),
             role_select("met_s1reps", "Number of replicates", num, e$reps, "rep"))
-  } else raw_vars_ui("met", dat, input$met_design, multi_trait = input$met_method != "two", need_env = TRUE)
+  } else raw_vars_ui("met", dat, mode$design, multi_trait = mode$multi, need_env = TRUE)
 })
 
 observeEvent(input$go_met, {

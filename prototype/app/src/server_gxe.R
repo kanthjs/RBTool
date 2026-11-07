@@ -1,9 +1,13 @@
 # GxE and stability screen (server). Sourced inside server().
 
 gxe_dat <- data_server(input, "gxe")
+# the pickers change only between one trait and several (MTSI); a reactiveVal does not invalidate when set to the same
+# value, so moving between the other methods keeps the variables already chosen
+gxe_multi <- reactiveVal(FALSE)
+observe(gxe_multi(identical(input$gxe_kind, "mtsi")))
 output$gxe_vars <- renderUI({
   dat <- gxe_dat(); d <- dat$d; cl <- names(d); e <- dat$ex
-  mt <- identical(input$gxe_kind, "mtsi"); num <- numeric_like(d)
+  mt <- gxe_multi(); num <- numeric_like(d)
   tagList(if (mt) role_select("gxe_trait", "Traits (two or more)", num, e$trait, "yield|^y$", multiple = TRUE) else role_select("gxe_trait", "Trait", num, e$trait[1], "yield|^y$"),
           if (mt) selectizeInput("gxe_lower", "Traits where LOWER is better (e.g. days to flowering, plant height, disease score)", num, e$lower, multiple = TRUE),
           role_select("gxe_geno", "Genotype", cl, e$geno, "gen|entry|line|variet"),
