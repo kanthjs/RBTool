@@ -4,6 +4,8 @@ here <- dirname(normalizePath(sub("--file=", "", grep("--file=", commandArgs(FAL
 setwd(file.path(here, "..", "app"))
 suppressMessages(library(shiny))
 app <- source("app.R")$value
+# height and width in pixels of a PNG file, from its IHDR header (no png package needed)
+png_dim <- function(path) { b <- readBin(path, "raw", 24); be <- function(x) sum(as.integer(x) * 256^(3:0)); c(be(b[21:24]), be(b[17:20])) }
 check <- function(cond, msg) if (!isTRUE(cond)) stop("FAILED: ", msg, call. = FALSE) else cat("ok  ", msg, "\n")
 html <- function(x) paste(as.character(x$html), collapse = "")
 doc_text <- function(path) {
@@ -126,7 +128,7 @@ testServer(app, {
   }
   session$setInputs(gge_type = "9"); check(grepl("Genotype 2", html(output$gge_pick)), "GGE: genotype pickers for 'compare two genotypes'")
   session$setInputs(gxe_dim = "j1", gxe_fmt = "png", gxe_dpi = "300")
-  dims <- dim(png::readPNG(output$dl_gxe_plot))
+  dims <- png_dim(output$dl_gxe_plot)
   check(all(abs(dims[2:1] - round(c(8.5, 6.5) / 2.54 * 300)) <= 1), "plot download: journal 1 column at 300 dpi")
   session$setInputs(gxe_fmt = "svg"); check(file.size(output$dl_gxe_plot) > 1000, "plot download: SVG")
   session$setInputs(gxe_dim = "custom", gxe_w = 12, gxe_h = 12, gxe_scale = 1.3, gxe_fmt = "pdf"); check(file.size(output$dl_gxe_plot) > 1000, "plot download: custom size PDF")
