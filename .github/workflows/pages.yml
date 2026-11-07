@@ -46,3 +46,6 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          # the bundle is about 130 MB; Pages sometimes needs more than the default 10 minutes to take it (run #4 timed out)
+          timeout: 1800000

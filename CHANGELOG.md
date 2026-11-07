@@ -16,7 +16,7 @@ All notable changes to RBTool. Dates are when the change was made; versions foll
 - GxE: WAASB / WAASBY (metan::waasb) with a live weight slider for mean vs. stability and selection intensity, WAASBY ranking, four-quadrant plot and BLUP biplot; multi-trait selection with MTSI (metan::mtsi) and MGIDI (metan::mgidi, on BLUPs or means) with per-trait direction (lower is better), selection intensity, selection differentials and strengths / weaknesses; Thai readings. Traits without genetic variance are left out of MGIDI on BLUPs with a note. New example: maize, 13 hybrids x 4 environments, 15 traits (metan data_ge2).
 - Multi-environment: "Combined ANOVA" method (Gomez & Gomez 1984): Env + Rep(Env) + Genotype + GxE with stats::lm; environments random (Env tested against Rep(Env), genotype against GxE, as aov with Error strata) or fixed (pooled error); CV, LSD, Bartlett's test and the error mean square of each site; Tukey / Dunnett with the error term of the genotype F test.
 - Single environment: "Standard ANOVA" method (RCBD, blocks and genotypes fixed, stats::lm / anova) with the ANOVA table, CV and LSD; Tukey / Dunnett comparisons work on it.
-- CI (`.github/workflows/pages.yml`) installs agricolae so that Shinylive bundles it. Bundle measured: see docs/PACKAGES.md.
+- CI (`.github/workflows/pages.yml`) installs agricolae so that Shinylive bundles it. The Pages deploy step waits up to 30 minutes (deploy run #4 timed out at the default 10). Bundle measured: see docs/PACKAGES.md.
 - Data layout guide with an example table and a template download next to every upload box; .xls named in the upload labels (it was already read); "." and "NA" cells in Excel files are missing values, as in CSV files.
 
 ### Changed (2026-11-07)
