@@ -85,19 +85,26 @@ gxe_thai <- function(r) switch(r$kind,
   gge = { e <- r$explained; sprintf("GGE biplot: PC1 และ PC2 อธิบายความผันแปรของพันธุ์และปฏิสัมพันธ์ได้ %.1f%% และ %.1f%% (รวม %.1f%%)", e[1, 2], e[2, 2], e[1, 2] + e[2, 2]) })
 output$gxe_results <- renderUI({
   r <- rv$gxe; req(r)
-  tb <- gxe_tables()
+  # WAASB: the parts that follow the live sliders (wy_live, si_live) are outputs of their own, so moving a slider
+  # redraws them and not every card; isolate() keeps the sliders out of this renderer's dependencies
+  live <- function(id, ui) if (r$kind == "waasb") uiOutput(id) else ui
+  tb <- isolate(gxe_tables())
   tagList(
     key_stats(stat("Analysis", gxe_label[[r$kind]]), stat(if (r$kind == "mtsi") "Traits" else "Trait", paste(if (r$kind == "mtsi") r$traits else r$trait, collapse = ", "))),
-    result_card("สรุปผล (ภาษาไทย)", p(lang = "th", gxe_thai(r)), copy = "cp_gxe_th", copy_label = "คัดลอก"),
+    result_card("สรุปผล (ภาษาไทย)", live("gxe_waasb_th", p(lang = "th", gxe_thai(r))), copy = "cp_gxe_th", copy_label = "คัดลอก"),
     if (r$kind == "mtsi" && length(r$dropped)) note_box(sprintf("Left out of MGIDI because their genotype BLUPs do not vary (no genetic variance across environments): %s. Choose \"Genotype means\" to use them.", paste(r$dropped, collapse = ", "))),
     if (r$kind == "mtsi" && is.null(r$mgidi)) note_box("MGIDI needs at least two traits with genetic variance. Choose \"Genotype means\" in step 4 (Selection), or other traits."),
     if (r$kind %in% c("ammi", "gge", "waasb", "mtsi")) result_card(paste("การแปลผล", c(ammi = "AMMI", gge = "GGE biplot", waasb = "WAASB / WAASBY", mtsi = "MTSI / MGIDI")[[r$kind]]),
-      div(lang = "th", reading_ui(gxe_reading(r)), p(class = "text-muted small mb-0", "ดูกราฟแต่ละแบบได้ในแท็บ Plot หมายเลขหัวข้อตรงกับมุมมองของ GGE biplot")),
+      div(lang = "th", live("gxe_waasb_read", reading_ui(gxe_reading(r))), p(class = "text-muted small mb-0", "ดูกราฟแต่ละแบบได้ในแท็บ Plot หมายเลขหัวข้อตรงกับมุมมองของ GGE biplot")),
       copy = "cp_gxe_read", copy_label = "คัดลอก"),
     if (r$kind == "shukla" && is.character(r$pbtools)) note_box("The PBTools model (nlme::gls) could not be fitted to these data: ", r$pbtools),
     if (r$kind == "shukla" && is.data.frame(r$pbtools)) note_box("PBTools estimates Shukla's model differently from metan: one residual standard deviation per genotype, by REML (nlme::gls). Its estimates are standard deviations and rank the genotypes similarly but not identically. See the Methods page."),
-    lapply(names(tb), function(n) result_card(n, html_table(fmt_df(tb[[n]])))))
+    lapply(names(tb), function(n) result_card(n, if (n == "WAASB and WAASBY") live("gxe_waasby", NULL) else html_table(fmt_df(tb[[n]])))))
 })
+waasb_res <- reactive({ r <- rv$gxe; req(r, r$kind == "waasb"); r })
+output$gxe_waasb_th <- renderUI(p(lang = "th", gxe_thai(waasb_res())))
+output$gxe_waasb_read <- renderUI(reading_ui(gxe_reading(waasb_res())))
+output$gxe_waasby <- renderUI(html_table(fmt_df(waasby_table())))
 copy_btn("cp_gxe_th", function() gxe_thai(rv$gxe), "summary")
 gxe_reading <- function(r) switch(r$kind, ammi = ammi_reading(r), gge = gge_reading(r), waasb = waasb_reading(r, waasby_table(), input$wy_live %||% 50), mtsi = mtsi_reading(r))
 copy_btn("cp_gxe_read", function() reading_text(gxe_reading(rv$gxe)), "interpretation")

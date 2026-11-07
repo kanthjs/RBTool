@@ -1,0 +1,5 @@
+fmt_df identical: TRUE 
+html_table identical apart from whitespace between tags: TRUE 
+               case old_ms new_ms speedup
+1 400 rows x 8 cols    870     80    10.9
+2  15 rows x 8 cols     30     10     3.0

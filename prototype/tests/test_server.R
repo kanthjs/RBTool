@@ -135,7 +135,10 @@ testServer(app, {
   session$setInputs(gxe_src = "ex", gxe_example = "maize", wy_live = 50, si_live = 15, waasb_view = "rank", gxe_waasb_higher = TRUE)
   go("go_gxe", gxe_kind = "waasb", gxe_trait = "KW", gxe_geno = "GEN", gxe_env = "ENV", gxe_rep = "REP")
   check(is.null(rv$gxe_err) && grepl("WAASBY", html(output$gxe_results)), paste("WAASB:", rv$gxe_err))
+  w50 <- html(output$gxe_waasby); th50 <- html(output$gxe_waasb_th)
+  check(grepl("gxe_waasby", html(output$gxe_results)) && grepl("WAASBY", w50), "WAASB: the live table is an output of its own")
   t1 <- waasby_table()$Genotype[1]; session$setInputs(wy_live = 100)
+  check(!identical(w50, html(output$gxe_waasby)) && !identical(th50, html(output$gxe_waasb_th)), "WAASB: the live table and summary follow the slider")
   check(waasby_table()$Genotype[1] == rv$gxe$table$Genotype[which.max(rv$gxe$table$Mean)], "WAASBY at 100% mean weight ranks by the mean (live slider)")
   for (v in c("rank", "quad", "pc")) { session$setInputs(waasb_view = v); check(!is.null(output$gxe_plot$src), paste("WAASB plot", v)) }
   session$setInputs(gxe_si = 15, gxe_mt_wy = 50, gxe_mgidi_on = "blup", mt_view = "mgidi")
