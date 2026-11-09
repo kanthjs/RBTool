@@ -1,9 +1,31 @@
 # Changelog
 
 All notable changes to RBTool. Dates are when the change was made; versions follow the app version written by
-`scripts/build_app.R` (`0.1.<CI run number>` on GitHub Pages).
+`scripts/build_app.R` (`0.9.<CI run number>` on GitHub Pages from 0.9.0; `0.1.<CI run number>` before).
 
-## Unreleased
+## 0.9.0 - 2026-11-09
+
+First version for general use.
+
+### Added (2026-11-08 to 2026-11-09)
+- A "what you get" box under the choices of step 1 on every screen: when to use the analysis, what it gives, what it does not, and the question it answers. Single and Multi-environment: one box each for ANOVA, genotype fixed and genotype random; GxE & stability: one box for each of the eight analyses.
+- Feedback: "ส่งข้อเสนอแนะ" in the navbar and buttons on the About page open the Google Form, with a diagnostic report to copy (app version, R, settings of the active screen, last error; no data values). `scripts/create_feedback_form.gs` builds the form.
+- Mean comparison shows one trait | environment at a time, with an "All" option, so that letters of different environments are not read together.
+- Two-stage with weights 1/SE² and genotype random: a warning that its heritability depends on the units of the data (the GxE variance is fixed at 1, as PBTools); the Thai summary leaves it out.
+
+### Changed (2026-11-08 to 2026-11-09)
+- Step 1 is "Analysis" on every screen; on Single and Multi-environment the genotype effect (fixed or random) moved into it, next to the method.
+- Multi-environment: the method is Combined ANOVA or Mixed model. One-stage (default) or two-stage, and the weights of the site means (default now 1/SE²), are under "How the sites are combined".
+- Data tab lists every row (scroll box, header kept in view) with the number of empty cells, instead of the first 10 rows.
+- Methods: descriptive statistics cite R (mean(), sd()); the list of differences from PBTools is removed.
+
+### Removed (2026-11-08 to 2026-11-09)
+- Two-stage from a file of site means (and the stage-1 means example and template): two-stage now always computes stage 1 from the plot data.
+- The key-number cards above the results.
+
+### Fixed (2026-11-08 to 2026-11-09)
+- The app did not start: an invalid escape (`\(`) in a Methods text.
+- Two-stage with genotype fixed: the results page failed ("argument is of length zero").
 
 ### Added (2026-11-07)
 - Loading screen as in RDstat (`prototype/loading_screen.html`, put into the site by the new `scripts/export_site.R`): RBTool name and colours, progress bar estimated from the last load in the browser, seconds elapsed and left, the three loading steps, a note that the data stay in the browser, and a hint when it takes over 3 minutes. CI exports with this script and installs `png`, which the server tests need (deploy run #6 stopped there).

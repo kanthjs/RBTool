@@ -7,7 +7,8 @@ type: software
 authors:
   - family-names: Jaisong
     given-names: Kanthanawit
-version: 0.1.0
+version: 0.9.0
+date-released: 2026-11-09
 url: "https://kanthjs.github.io/RBTool/"
 repository-code: "https://github.com/kanthjs/RBTool"
 license: GPL-2.0-or-later

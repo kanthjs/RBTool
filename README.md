@@ -27,7 +27,7 @@ The statistics are computed with published R packages instead of PBTools' own fu
 ## Run and test
 
 ```
-Rscript -e 'install.packages(c("shiny", "bslib", "lme4", "emmeans", "multcomp", "multcompView", "nlme", "metan", "readxl", "writexl", "ggplot2"))'
+Rscript -e 'install.packages(c("shiny", "bslib", "lme4", "emmeans", "multcomp", "multcompView", "nlme", "metan", "agricolae", "readxl", "writexl", "ggplot2"))'
 Rscript scripts/build_app.R
 Rscript prototype/tests/test_server.R
 Rscript -e 'shiny::runApp("prototype/app")'
@@ -40,7 +40,7 @@ Rscript -e 'install.packages("reference/pbtools-port", repos = NULL, type = "sou
 Rscript scripts/compare_engine.R
 ```
 
-Build the browser version: `Rscript -e 'shinylive::export("prototype/app", "_site")'` and serve `_site` over http.
+Build the browser version (with the RBTool loading screen): `Rscript scripts/export_site.R _site` and serve `_site` over http.
 
 ## License
 

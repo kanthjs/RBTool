@@ -139,7 +139,7 @@ met_anova_thai <- function(r) {
   paste(vapply(unique(r$anova$Trait), function(t) {
     x <- r$anova[r$anova$Trait == t, ]; ii <- r$info[r$info$Trait == t, ]; bb <- r$bartlett[r$bartlett$Trait == t, ]; g <- r$geno[r$geno$Trait == t, ]
     pg <- x$`Pr(>F)`[x$Source == "Genotype"]; pge <- x$`Pr(>F)`[x$Source == "Genotype x Environment"]
-    paste0(sprintf("%s: วิเคราะห์ความแปรปรวนร่วม %d %s, %d %s (%s เป็น %s) ความแตกต่างระหว่าง %s %s ปฏิสัมพันธ์ %s × %s %s",
+    paste0(sprintf("%s: วิเคราะห์ความแปรปรวนรวมหลายสถานที่ (combined ANOVA) %d %s, %d %s (%s เป็น %s) ความแตกต่างระหว่าง %s %s ปฏิสัมพันธ์ %s × %s %s",
                    t, ii$Environments, el, ii$Genotypes, gl, el, if (isTRUE(r$env_random)) paste("random ทดสอบ", gl, "ด้วย MS ของ G×E") else "fixed ทดสอบด้วย pooled error",
                    gl, sig(pg), gl, el, sig(pge)),
            if (pge < 0.05) " จึงควรดูผลรายสถานที่ หรือวิเคราะห์ความเสถียร (เมนู GxE & stability)" else "",

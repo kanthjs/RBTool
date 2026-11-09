@@ -203,7 +203,7 @@ method_topics <- list(
   # ---- multi-environment ----
   method_topic(
     "met_anova",
-    "Combined ANOVA (การวิเคราะห์ความแปรปรวนร่วม)",
+    "Combined ANOVA (การวิเคราะห์ความแปรปรวนรวมหลายสถานที่)",
     "met",
     software = c(
       "stats::lm()",
@@ -496,7 +496,7 @@ di
       code("mean()"),
       ") และส่วนเบี่ยงเบนมาตรฐาน (",
       code("sd()"),
-      ", ตัวหาร n − 1) ด้วย R",
+      ", ตัวหาร n − 1) ด้วย R ",
       "Single environment แยกตามสถานที่ One-stage และ Combined ANOVA รวมทุกแปลงของทุกสถานที่ Two-stage ใช้ค่าเฉลี่ยขั้นที่ 1 ของทุกสถานที่"
     )
   ),
@@ -749,5 +749,5 @@ about_ui <- div(
     "ข้อความในแอปใช้ฟอนต์ จุฬาภรณ์ลิขิต (Chulabhorn Likhit) ฟอนต์แห่งชาติจากราชวิทยาลัยจุฬาภรณ์"
   ),
   h4("สัญญาอนุญาต"),
-  p("GNU General Public License รุ่น 2 หรือใหม่กว่า)")
+  p("GNU General Public License รุ่น 2 หรือใหม่กว่า")
 )

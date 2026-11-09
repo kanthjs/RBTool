@@ -33,7 +33,7 @@ jobs:
       - name: Copy engine into the app
         run: Rscript scripts/build_app.R
         env:
-          PBTOOL_APP_VERSION: 0.1.${{ github.run_number }}
+          PBTOOL_APP_VERSION: 0.9.${{ github.run_number }}
       - name: Test the app (deploy stops if a test fails)
         run: Rscript prototype/tests/test_server.R
       - name: Export Shinylive site

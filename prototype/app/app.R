@@ -64,7 +64,7 @@ home_ui <- div(
     home_card(
       "home_met",
       "map-location-dot",
-      "Multi-Environemnt Analysis",
+      "Multi-environment Analysis",
       "รวมหลายสถานที่ในโมเดลเดียว (one-stage) หรือรวมค่าเฉลี่ยของแต่ละสถานที่ (two-stage) ทดสอบปฏิสัมพันธ์พันธุ์ × สถานที่",
       "BLUE / BLUP รวมทุกสถานที่ · heritability · กราฟปฏิสัมพันธ์"
     ),
