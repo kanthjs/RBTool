@@ -49,7 +49,7 @@ software_uses <- list(
   ),
   list(
     pkg = "multcomp",
-    use = "Tukey และ Dunnett แบบ exact เหมือน PBTools",
+    use = "Tukey และ Dunnett แบบ exact",
     fun = c("glht()", "mcp()")
   ),
   list(
@@ -64,7 +64,7 @@ software_uses <- list(
   ),
   list(
     pkg = "nlme",
-    use = "Shukla แบบ PBTools (ความแปรปรวนแยกตามพันธุ์)",
+    use = "Shukla (ความแปรปรวนแยกตามพันธุ์)",
     fun = c("gls()")
   ),
   list(
@@ -237,7 +237,7 @@ method_topics <- list(
     p(
       "ทุกแปลงของทุกสถานที่ในโมเดลผสมเดียว (",
       code("lmer()"),
-      ") สถานที่ บล็อกภายในสถานที่ และปฏิสัมพันธ์พันธุ์ × สถานที่ เป็น random เหมือน PBTools ",
+      ") สถานที่ บล็อกภายในสถานที่ และปฏิสัมพันธ์พันธุ์ × สถานที่ เป็น random",
       "พันธุ์เป็น fixed (BLUE) หรือ random (BLUP และอัตราพันธุกรรมรวมทุกสถานที่) ทดสอบเทอมสุ่มแต่ละเทอมด้วย likelihood ratio test ",
       "ค่าเฉลี่ยพันธุ์ × สถานที่ คือค่าทำนายจากโมเดลโดยไม่รวมเทอมของบล็อก"
     )
@@ -364,7 +364,7 @@ di
       "ใช้ดัชนีความแปรปรวนความเสถียรของ Shukla (Shukla, 1972) ด้วย ",
       code("Shukla()"),
       " ค่าน้อย = เสถียร พร้อมผลรวมลำดับของผลผลิตและความเสถียร (Kang) ",
-      "เพื่อประเมินสัดส่วนของความแปรปรวนจาก G × E interaction ที่มาจากแต่ละพันธุ์ โดยค่าน้อยหมายถึงความเสถียรสูง พร้อมทั้งรายงานผลรวมลำดับของผลผลิตและความเสถียรตามแนวคิดของ Kang ผู้ใช้สามารถเลือกแสดงโมเดลแบบ PBTools ได้ โดยรายงานส่วนเบี่ยงเบนมาตรฐานของ residual แยกตามพันธุ์ และประมาณค่าด้วยวิธี REML (",
+      "เพื่อประเมินสัดส่วนของความแปรปรวนจาก G × E interaction ที่มาจากแต่ละพันธุ์ โดยค่าน้อยหมายถึงความเสถียรสูง พร้อมทั้งรายงานผลรวมลำดับของผลผลิตและความเสถียรตามแนวคิดของ Kang โดยรายงานส่วนเบี่ยงเบนมาตรฐานของ residual แยกตามพันธุ์ และประมาณค่าด้วยวิธี REML (",
       code("gls()"),
       ")"
     )
@@ -490,10 +490,13 @@ di
     "desc",
     "สถิติเชิงพรรณนา",
     "data",
-    software = c("stats::sd()"),
-    refs = c("International Rice"),
+    software = c("base::mean()", "stats::sd()"),
     p(
-      "คำนวณแบบเดียวกับฟังก์ชัน DescriptiveStatistics ของ PBTools: จำนวนข้อมูลที่ไม่สูญหาย ค่าเฉลี่ย และส่วนเบี่ยงเบนมาตรฐาน (ตัวหาร n − 1) ",
+      "จำนวนข้อมูลที่ไม่สูญหาย ค่าเฉลี่ย (",
+      code("mean()"),
+      ") และส่วนเบี่ยงเบนมาตรฐาน (",
+      code("sd()"),
+      ", ตัวหาร n − 1) ด้วย R",
       "Single environment แยกตามสถานที่ One-stage และ Combined ANOVA รวมทุกแปลงของทุกสถานที่ Two-stage ใช้ค่าเฉลี่ยขั้นที่ 1 ของทุกสถานที่"
     )
   ),
@@ -660,7 +663,7 @@ methods_ui <- div(
   style = "max-width: 820px;",
   h3("Methods"),
   p(
-    "วิธีวิเคราะห์ของโปรแกรม เป็น Phenotypic Analysis เท่านั้น คำนวณด้วย R และ packages ที่เป็นที่ยอมรับบน CRAN แล้ว",
+    "โปรแกรมวิเคราะห์ Phenotypic Analysis เท่านั้น คำนวณด้วย R และ packages ที่เป็นที่ยอมรับบน CRAN แล้ว",
     "โดยแสดงชื่อ package รุ่น และฟังก์ชันที่ใช้ เพื่อให้อ้างอิงได้เมื่อตีพิมพ์"
   ),
   h3("R package"),
@@ -713,11 +716,21 @@ about_ui <- div(
   h4("รุ่นของแอป"),
   p(code(version_label())),
   h4("ส่งข้อเสนอแนะและแจ้งปัญหา"),
-  p("หากพบข้อผิดพลาด ผลการวิเคราะห์ดูผิดปกติ หรือมีข้อเสนอแนะฟังก์ชันที่อยากให้เพิ่ม แจ้งได้ผ่านแบบฟอร์มออนไลน์"),
+  p(
+    "หากพบข้อผิดพลาด ผลการวิเคราะห์ดูผิดปกติ หรือมีข้อเสนอแนะฟังก์ชันที่อยากให้เพิ่ม แจ้งได้ผ่านแบบฟอร์มออนไลน์"
+  ),
   div(
     class = "d-flex gap-2 flex-wrap mb-2",
-    actionButton("btn_about_feedback", tagList(icon("comment-dots"), " แบบฟอร์มส่งข้อเสนอแนะ / แจ้งปัญหา"), class = "btn btn-primary"),
-    actionButton("cp_diagnostic", tagList(icon("copy"), " คัดลอกข้อมูลวินิจฉัยระบบ"), class = "btn btn-outline-secondary")
+    actionButton(
+      "btn_about_feedback",
+      tagList(icon("comment-dots"), " แบบฟอร์มส่งข้อเสนอแนะ / แจ้งปัญหา"),
+      class = "btn btn-primary"
+    ),
+    actionButton(
+      "cp_diagnostic",
+      tagList(icon("copy"), " คัดลอกข้อมูลวินิจฉัยระบบ"),
+      class = "btn btn-outline-secondary"
+    )
   ),
   h4("ผู้ดูแล"),
   p(app_maintainer),
@@ -736,5 +749,5 @@ about_ui <- div(
     "ข้อความในแอปใช้ฟอนต์ จุฬาภรณ์ลิขิต (Chulabhorn Likhit) ฟอนต์แห่งชาติจากราชวิทยาลัยจุฬาภรณ์"
   ),
   h4("สัญญาอนุญาต"),
-  p("GNU General Public License รุ่น 2 หรือใหม่กว่า (PBTools เป็น GPL >= 2)")
+  p("GNU General Public License รุ่น 2 หรือใหม่กว่า)")
 )
