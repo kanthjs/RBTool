@@ -81,11 +81,9 @@ app_css <- css_fill(
     .step .num { flex: none; width: 28px; height: 28px; border-radius: 6px; background: #f2eaea; color: %1$s; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; }
     
     /* Key Stats: sleek minimal data counters */
-    .key-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 4px 0 16px; }
-    .key-stat { background: #fff; border: 1px solid #ede8e8; border-radius: 8px; padding: 10px 14px; box-shadow: none; }
-    .key-stat .label { font-size: 11.5px; color: #7a696a; text-transform: uppercase; letter-spacing: .4px; font-weight: 500; }
-    .key-stat .value { font-size: 23px; font-weight: 700; color: #27191a; line-height: 1.25; margin: 2px 0; }
-    .key-stat .note { font-size: 12px; color: #928081; }
+    .data-scroll { max-height: 600px; overflow: auto; border: 1px solid #ede8e8; border-radius: 6px; }
+    .data-scroll .table-responsive { overflow: visible; }
+    .data-scroll thead th { position: sticky; top: 0; z-index: 2; --bs-table-bg: #fff; --bs-table-bg-state: #fff; background-color: #fff !important; box-shadow: inset 0 -1px 0 #ede8e8; }
 
     /* Result cards */
     .result-card { border-radius: 8px; border: 1px solid #ebe5e5; background: #fff; margin-bottom: 16px; box-shadow: none; }

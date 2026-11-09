@@ -3,7 +3,7 @@
   "configurations": [
     {
       "name": "rbtool-app",
-      "runtimeExecutable": "C:/Program Files/R/R-4.6.2/bin/Rscript.exe",
+      "runtimeExecutable": "C:/Program Files/R/R-4.6.1/bin/Rscript.exe",
       "runtimeArgs": ["-e", "shiny::runApp('prototype/app', port = 4321, launch.browser = FALSE)"],
       "port": 4321
     }

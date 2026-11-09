@@ -31,33 +31,29 @@ track_stale("sea", "sea")
 
 sea_thai <- function(r) {
   s <- r$summary; n_env <- if (is.null(s$Environment)) 1 else length(unique(s$Environment))
+  g <- col_lab("sea", "geno", "พันธุ์"); e <- col_lab("sea", "env", "สถานที่"); b <- col_lab("sea", "block", "บล็อก")
   if (identical(r$method, "anova")) {
     m <- r$means; best <- m[which.max(m$Mean), ]; sig <- sum(s$`P (genotype)` < 0.05, na.rm = TRUE)
-    return(sprintf("วิเคราะห์ %s ด้วยการวิเคราะห์ความแปรปรวนแบบมาตรฐาน (RCBD, บล็อกและพันธุ์เป็น fixed effect) พันธุ์แตกต่างกันอย่างมีนัยสำคัญ (F test, p < 0.05) %d จาก %d %s; ค่าสัมประสิทธิ์ความแปรผัน (CV) อยู่ระหว่าง %.1f%% ถึง %.1f%%%s ค่าเฉลี่ยสูงสุดคือ %s (%s%s) ใช้แท็บ Mean comparison เพื่อเปรียบเทียบพันธุ์",
-            paste(unique(s$Trait), collapse = ", "), sig, nrow(s), if (n_env > 1) "สถานที่/ลักษณะ" else "ลักษณะ", min(s$`CV (%)`), max(s$`CV (%)`),
+    return(sprintf("วิเคราะห์ %s ด้วยการวิเคราะห์ความแปรปรวนแบบมาตรฐาน (RCBD, %s และ %s เป็น fixed effect) %s แตกต่างกันอย่างมีนัยสำคัญ (F test, p < 0.05) %d จาก %d %s; ค่าสัมประสิทธิ์ความแปรผัน (CV) อยู่ระหว่าง %.1f%% ถึง %.1f%%%s ค่าเฉลี่ยสูงสุดคือ %s (%s%s) ใช้แท็บ Mean comparison เพื่อเปรียบเทียบ %s",
+            paste(unique(s$Trait), collapse = ", "), b, g, g, sig, nrow(s), if (n_env > 1) paste0(e, "/ลักษณะ") else "ลักษณะ", min(s$`CV (%)`), max(s$`CV (%)`),
             if (max(s$`CV (%)`) > 20) " (CV เกิน 20% ความแม่นยำของการทดลองค่อนข้างต่ำ)" else "",
-            best$Genotype, fmt_n(best$Mean), if (!is.null(best$Environment)) paste0(", ", best$Environment) else ""))
+            best$Genotype, fmt_n(best$Mean), if (!is.null(best$Environment)) paste0(", ", best$Environment) else "", g))
   }
   if (isTRUE(r$random)) {
     sig <- sum(s$`LRT p-value` < 0.05, na.rm = TRUE)
-    sprintf("วิเคราะห์ %s ด้วย linear mixed model แบบแผน %s โดยให้พันธุ์เป็น random effect ความแปรปรวนทางพันธุกรรมมีนัยสำคัญ (likelihood ratio test, p < 0.05) %d จาก %d %s ค่าอัตราพันธุกรรม (heritability) อยู่ระหว่าง %.2f ถึง %.2f",
-            paste(unique(s$Trait), collapse = ", "), pb_designs[[r$design]], sig, nrow(s), if (n_env > 1) "สถานที่/ลักษณะ" else "ลักษณะ", min(s$Heritability), max(s$Heritability))
+    sprintf("วิเคราะห์ %s ด้วย linear mixed model แบบแผน %s โดยให้ %s เป็น random effect ความแปรปรวนทางพันธุกรรมมีนัยสำคัญ (likelihood ratio test, p < 0.05) %d จาก %d %s ค่าอัตราพันธุกรรม (heritability) อยู่ระหว่าง %.2f ถึง %.2f",
+            paste(unique(s$Trait), collapse = ", "), pb_designs[[r$design]], g, sig, nrow(s), if (n_env > 1) paste0(e, "/ลักษณะ") else "ลักษณะ", min(s$Heritability), max(s$Heritability))
   } else {
     m <- r$means; best <- m[which.max(m$Mean), ]
-    sprintf("วิเคราะห์ %s ด้วย linear mixed model แบบแผน %s โดยให้พันธุ์เป็น fixed effect ได้ค่าเฉลี่ยปรับแล้ว (BLUE) ของ %d พันธุ์ ค่าเฉลี่ยสูงสุดคือ %s (%s%s) ค่า SED เฉลี่ย %s ใช้แท็บ Mean comparison เพื่อเปรียบเทียบพันธุ์",
-            paste(unique(s$Trait), collapse = ", "), pb_designs[[r$design]], length(unique(m$Genotype)), best$Genotype, fmt_n(best$Mean),
-            if (!is.null(best$Environment)) paste0(", ", best$Environment) else "", fmt_n(mean(s$`Average SED`)))
+    sprintf("วิเคราะห์ %s ด้วย linear mixed model แบบแผน %s โดยให้ %s เป็น fixed effect ได้ค่าเฉลี่ยปรับแล้ว (BLUE) ของ %d %s ค่าเฉลี่ยสูงสุดคือ %s (%s%s) ค่า SED เฉลี่ย %s ใช้แท็บ Mean comparison เพื่อเปรียบเทียบ %s",
+            paste(unique(s$Trait), collapse = ", "), pb_designs[[r$design]], g, length(unique(m$Genotype)), g, best$Genotype, fmt_n(best$Mean),
+            if (!is.null(best$Environment)) paste0(", ", best$Environment) else "", fmt_n(mean(s$`Average SED`)), g)
   }
 }
 output$sea_results <- renderUI({
   r <- rv$sea; req(r)
   s <- r$summary
   tagList(
-    key_stats(stat("Traits", length(unique(s$Trait))), stat("Environments", if (is.null(s$Environment)) 1 else length(unique(s$Environment))),
-              stat("Genotypes", length(unique(r$means$Genotype))),
-              if (isTRUE(r$random)) stat("Heritability", sprintf("%.2f", stats::median(s$Heritability)), if (nrow(s) > 1) sprintf("median; range %.2f to %.2f", min(s$Heritability), max(s$Heritability)))
-              else if (identical(r$method, "anova")) stat("CV (%)", sprintf("%.1f", stats::median(s$`CV (%)`)), if (nrow(s) > 1) sprintf("median; range %.1f to %.1f", min(s$`CV (%)`), max(s$`CV (%)`)) else "coefficient of variation")
-              else stat("Average SED", fmt_n(mean(s$`Average SED`)), "standard error of a difference")),
     result_card("สรุปผล (ภาษาไทย)", p(lang = "th", sea_thai(r)), p(lang = "th", class = "text-muted small mb-0", "สรุปนี้สร้างจากโปรแกรม ควรอ่านร่วมกับบริบทของการทดลอง"), copy = "cp_sea_th", copy_label = "คัดลอก"),
     result_card("Descriptive statistics", html_table(fmt_df(r$descriptive)), copy = "cp_sea_desc",
       p(class = "text-muted small mb-0", "Raw data of each trait, by environment, as PBTools (DescriptiveStatistics).")),

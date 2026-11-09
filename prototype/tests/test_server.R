@@ -24,7 +24,8 @@ testServer(app, {
   r <- rv$sea
   check(is.null(rv$sea_err) && nrow(r$summary) == 11, "single env random: 11 environments")
   check(abs(r$summary$Heritability[r$summary$Environment == "E2"] - 0.95) < 0.01, "single env random: heritability E2 = 0.95 (PBTools)")
-  check(grepl("Heritability", html(output$sea_results)) && grepl("result-card", html(output$sea_results)), "single env: key numbers and result cards")
+  check(grepl("Heritability", html(output$sea_results)) && grepl("result-card", html(output$sea_results)), "single env: heritability and result cards")
+  check(grepl("<strong>495</strong>\\s*rows", html(output$sea_data)) && lengths(gregexpr("<tr", html(output$sea_data))) == 496, "single env: Data tab lists every row")
   ds <- r$descriptive[r$descriptive$Environment == "E1", ]
   check(nrow(r$descriptive) == 11 && ds$`N non-missing` == 45 && abs(ds$Mean - 2403.838) < 0.001 && grepl("Descriptive statistics", html(output$sea_results)),
         "single env: descriptive statistics by environment (PBTools: E1 n = 45)")
@@ -46,6 +47,7 @@ testServer(app, {
   session$setInputs(sea_example = "rcb2")
   go("go_sea", sea_trait = c("Y1", "Y2"), sea_geno = "Gen", sea_env = "", sea_block = "Blk", sea_random = "fixed")
   check(is.null(rv$sea_err) && is.null(rv$sea$summary$Environment) && nrow(rv$sea$summary) == 2, "single env: one site (no environment column), two traits")
+  check(grepl("ให้ Gen เป็น fixed", sea_thai(rv$sea)) && !grepl("พันธุ์", sea_thai(rv$sea)), "Thai summary names the genotype column of the data")
   session$setInputs(sea_pw_type = "Tukey", sea_pw_exact = TRUE, sea_pw_all = TRUE); go("go_sea_pw")
   check(grepl("Tukey comparisons", html(output$sea_pw_out)), "Tukey with the exact multcomp intervals")
   t0 <- Sys.time(); session$setInputs(sea_example = "rcb11"); go("go_sea", sea_trait = "Yield", sea_geno = "Genotype", sea_env = "Env", sea_block = "Block", sea_random = "fixed")
@@ -56,7 +58,7 @@ testServer(app, {
   session$setInputs(met_src = "ex", met_example = "rcb11", met_design = "RCB", met_method = "one")
   go("go_met", met_trait = "Yield", met_geno = "Genotype", met_env = "Env", met_block = "Block", met_random = "random")
   check(is.null(rv$met_err) && !is.na(rv$met$info$Heritability), paste("one-stage random: heritability across sites", rv$met_err))
-  check(grepl("GxE interaction", html(output$met_results)), "one-stage: GxE test in the key numbers")
+  check(grepl("Genotype x Environment", html(output$met_results)) && !grepl("key-stat", html(output$met_results)), "one-stage: GxE test in the results, no key-number cards")
   check(nrow(rv$met$descriptive) == 1 && rv$met$descriptive$`N non-missing` == 495 && grepl("Descriptive statistics", html(output$met_results)),
         "one-stage: descriptive statistics of all plots (n = 495)")
   session$setInputs(met_method = "two", met_s1 = "calc", met_weight = "none")
@@ -137,6 +139,8 @@ testServer(app, {
   session$setInputs(gxe_src = "ex", gxe_example = "maize", wy_live = 50, si_live = 15, waasb_view = "rank", gxe_waasb_higher = TRUE)
   go("go_gxe", gxe_kind = "waasb", gxe_trait = "KW", gxe_geno = "GEN", gxe_env = "ENV", gxe_rep = "REP")
   check(is.null(rv$gxe_err) && grepl("WAASBY", html(output$gxe_results)), paste("WAASB:", rv$gxe_err))
+  rd <- reading_text(gxe_reading(rv$gxe)); th <- gxe_thai(rv$gxe)
+  check(grepl("GEN", rd) && grepl("ENV", rd) && !grepl("พันธุ์|สถานที่", paste(rd, th)), "GxE Thai text names the genotype and environment columns")
   w50 <- html(output$gxe_waasby); th50 <- html(output$gxe_waasb_th)
   check(grepl("gxe_waasby", html(output$gxe_results)) && grepl("WAASBY", w50), "WAASB: the live table is an output of its own")
   t1 <- waasby_table()$Genotype[1]; session$setInputs(wy_live = 100)

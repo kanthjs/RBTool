@@ -3,6 +3,13 @@
 run_safe <- function(expr) tryCatch(list(res = expr, err = NULL),
   error = function(e) list(res = NULL, err = sub("^Error in [^:]*: ?", "", conditionMessage(e))))
 
+# Name of the data column chosen for a role (geno, env, block) at the last run of screen p, for the Thai summaries;
+# falls back to a Thai word when the role was not chosen
+col_lab <- function(p, role, default) {
+  v <- rv[[paste0(p, "_set")]][[paste0(p, "_", role)]]
+  if (length(v) == 1 && nzchar(v)) v else default
+}
+
 # Inputs of a screen that change its results; once they differ from the values of the last run, the results are greyed
 # out (stale_js) and a note offers to run again
 settings_of <- function(p, extra = character()) {

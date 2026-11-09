@@ -57,12 +57,14 @@ html_table <- function(df, max_rows = 400) {
       tags$tbody(lapply(rows, function(r) tags$tr(HTML(r))))),
     if (more) p(class = "text-muted small", sprintf("Showing the first %d rows; the Excel file has all of them.", max_rows)))
 }
-data_preview_ui <- function(d, n = 10) {
-  shown <- utils::head(d, n)
+# every row of the data, so the user can check nothing is missing; scrolls inside a box of fixed height
+data_preview_ui <- function(d) {
+  shown <- d
   shown[] <- lapply(shown, function(v) ifelse(is.na(v), "", as.character(v)))
+  n_na <- sum(is.na(d))
   tagList(p(strong(formatC(nrow(d), format = "d", big.mark = ",")), "rows x", strong(ncol(d)), "columns.",
-            if (nrow(d) > n) sprintf("Showing the first %d rows.", n)),
-          html_table(shown))
+            if (n_na) sprintf("%s empty cells.", formatC(n_na, format = "d", big.mark = ","))),
+          div(class = "data-scroll", html_table(shown, max_rows = Inf)))
 }
 
 run_hint <- function(button) div(class = "empty-state", icon("chart-simple"),
@@ -71,9 +73,6 @@ run_hint <- function(button) div(class = "empty-state", icon("chart-simple"),
 side_step <- function(n, title, ...) div(class = "side-step", div(class = "side-step-title", span(class = "num", n), title), ...)
 advanced_box <- function(..., title = " Advanced options") tags$details(class = "advanced", tags$summary(icon("sliders"), title), div(class = "advanced-body", ...))
 run_bar <- function(id, label) div(class = "run-bar", actionButton(id, tagList(icon("play"), " ", label), class = "btn-primary w-100"))
-key_stats <- function(...) div(class = "key-stats", lapply(Filter(Negate(is.null), list(...)), function(s)
-  div(class = "key-stat", div(class = "label", s$label), div(class = "value", s$value), if (!is.null(s$note)) div(class = "note", s$note))))
-stat <- function(label, value, note = NULL) list(label = label, value = value, note = note)
 result_card <- function(title, ..., copy = NULL, copy_label = "Copy") bslib::card(class = "result-card",
   bslib::card_header(class = "d-flex justify-content-between align-items-center", span(title),
                      if (!is.null(copy)) actionButton(copy, tagList(icon("copy"), " ", copy_label), class = "btn-sm")),

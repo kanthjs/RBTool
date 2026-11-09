@@ -60,7 +60,16 @@ gxe_tables <- function() {
     mtsi = Filter(Negate(is.null), list(`MTSI` = r$mtsi_table, `MTSI selection differentials` = r$mtsi_dif, `MGIDI` = r$mgidi_table,
                                         `MGIDI selection differentials` = r$mgidi_dif, `MGIDI factor contributions (strengths and weaknesses)` = r$mgidi_contri)))
 }
-gxe_thai <- function(r) switch(r$kind,
+# Thai text of the GxE screen: the words for genotype and site are swapped for the names of the genotype and
+# environment columns of the data
+gxe_words <- function(x) {
+  for (w in list(c("พันธุ์", col_lab("gxe", "geno", "พันธุ์")), c("สถานที่", col_lab("gxe", "env", "สถานที่"))))
+    if (w[2] != w[1]) x <- trimws(gsub(" {2,}", " ", gsub(w[1], paste0(" ", w[2], " "),
+                                                         gsub(paste0(w[1], "(?=[:;,.)])"), paste0(" ", w[2]), x, perl = TRUE), fixed = TRUE)))
+  x
+}
+gxe_thai <- function(r) {
+  x <- switch(r$kind,
   waasb = { t <- waasby_table(); e <- r$estimates; h <- e$Values[e$Parameters == "Heritability"]; p_ge <- r$lrt[["Pr(>Chisq)"]][3]
     sprintf("WAASB/WAASBY ของ %s: น้ำหนักค่าเฉลี่ย %d%% และความเสถียร %d%% พันธุ์ที่ WAASBY สูงสุดคือ %s; คัดเลือก %d%% ได้ %s; พันธุ์ที่เสถียรที่สุด (WAASB ต่ำสุด) คือ %s; อัตราพันธุกรรมรวมทุกสถานที่ = %.2f%s",
             r$trait, input$wy_live %||% 50, 100 - (input$wy_live %||% 50), t$Genotype[1], input$si_live %||% 15, paste(t$Genotype[t$Selected == "yes"], collapse = ", "),
@@ -81,8 +90,10 @@ gxe_thai <- function(r) switch(r$kind,
   shukla = { t <- r$table; sprintf("พันธุ์ที่เสถียรที่สุดตามค่า Shukla's stability variance (ค่าต่ำสุด) คือ %s และไม่เสถียรที่สุดคือ %s เมื่อพิจารณาทั้งผลผลิตและความเสถียร (ผลรวมลำดับของ Kang) พันธุ์ที่ดีที่สุดคือ %s",
              t$Genotype[which.min(t$`Shukla variance`)], t$Genotype[which.max(t$`Shukla variance`)], t$Genotype[which.min(t$`Sum of ranks (Kang)`)]) },
   stats = { t <- r$table; sprintf("ค่าเฉลี่ยสูงสุด: %s; Wricke ecovalence ต่ำสุด (เสถียร): %s; Annicchiarico สูงสุด: %s", t$Genotype[which.max(t$Mean)], t$Genotype[which.min(t$`Wricke ecovalence`)], t$Genotype[which.max(t$`Annicchiarico Wi (%)`)]) },
-  ammi = { a <- r$anova; pc <- a[grepl("^PC", a$Source), ]; sprintf("ปฏิสัมพันธ์ พันธุ์ × สภาพแวดล้อม แยกได้ %d องค์ประกอบ PC1 และ PC2 อธิบายได้ %.1f%% และ %.1f%% ของผลรวมกำลังสองของปฏิสัมพันธ์", nrow(pc), pc$`% of GxE`[1], pc$`% of GxE`[2]) },
+  ammi = { a <- r$anova; pc <- a[grepl("^PC", a$Source), ]; sprintf("ปฏิสัมพันธ์ พันธุ์ × %s แยกได้ %d องค์ประกอบ PC1 และ PC2 อธิบายได้ %.1f%% และ %.1f%% ของผลรวมกำลังสองของปฏิสัมพันธ์", col_lab("gxe", "env", "สภาพแวดล้อม"), nrow(pc), pc$`% of GxE`[1], pc$`% of GxE`[2]) },
   gge = { e <- r$explained; sprintf("GGE biplot: PC1 และ PC2 อธิบายความผันแปรของพันธุ์และปฏิสัมพันธ์ได้ %.1f%% และ %.1f%% (รวม %.1f%%)", e[1, 2], e[2, 2], e[1, 2] + e[2, 2]) })
+  gxe_words(x)
+}
 output$gxe_results <- renderUI({
   r <- rv$gxe; req(r)
   # WAASB: the parts that follow the live sliders (wy_live, si_live) are outputs of their own, so moving a slider
@@ -90,7 +101,6 @@ output$gxe_results <- renderUI({
   live <- function(id, ui) if (r$kind == "waasb") uiOutput(id) else ui
   tb <- isolate(gxe_tables())
   tagList(
-    key_stats(stat("Analysis", gxe_label[[r$kind]]), stat(if (r$kind == "mtsi") "Traits" else "Trait", paste(if (r$kind == "mtsi") r$traits else r$trait, collapse = ", "))),
     result_card("สรุปผล (ภาษาไทย)", live("gxe_waasb_th", p(lang = "th", gxe_thai(r))), copy = "cp_gxe_th", copy_label = "คัดลอก"),
     if (r$kind == "mtsi" && length(r$dropped)) note_box(sprintf("Left out of MGIDI because their genotype BLUPs do not vary (no genetic variance across environments): %s. Choose \"Genotype means\" to use them.", paste(r$dropped, collapse = ", "))),
     if (r$kind == "mtsi" && is.null(r$mgidi)) note_box("MGIDI needs at least two traits with genetic variance. Choose \"Genotype means\" in step 4 (Selection), or other traits."),
@@ -106,7 +116,10 @@ output$gxe_waasb_th <- renderUI(p(lang = "th", gxe_thai(waasb_res())))
 output$gxe_waasb_read <- renderUI(reading_ui(gxe_reading(waasb_res())))
 output$gxe_waasby <- renderUI(html_table(fmt_df(waasby_table())))
 copy_btn("cp_gxe_th", function() gxe_thai(rv$gxe), "summary")
-gxe_reading <- function(r) switch(r$kind, ammi = ammi_reading(r), gge = gge_reading(r), waasb = waasb_reading(r, waasby_table(), input$wy_live %||% 50), mtsi = mtsi_reading(r))
+gxe_reading <- function(r) {
+  x <- switch(r$kind, ammi = ammi_reading(r), gge = gge_reading(r), waasb = waasb_reading(r, waasby_table(), input$wy_live %||% 50), mtsi = mtsi_reading(r))
+  if (is.null(x)) x else stats::setNames(lapply(x, gxe_words), gxe_words(names(x)))
+}
 copy_btn("cp_gxe_read", function() reading_text(gxe_reading(rv$gxe)), "interpretation")
 
 # WAASBY ranks over weighting scenarios: computed only when that plot is asked for (about 20 s in the browser)

@@ -51,25 +51,19 @@ met_geno_col <- reactive(if (rv$met$method %in% c("one-stage", "combined ANOVA")
 met_thai <- function(r) {
   if (identical(r$method, "combined ANOVA")) return(met_anova_thai(r))
   i <- r$info; ge <- r$lrt[!is.na(r$lrt$Chisq) & r$lrt$Test == "Genotype x Environment", ]
-  paste0(sprintf("วิเคราะห์ข้อมูลหลายสถานที่แบบ%s (%d สถานที่ %d พันธุ์) โดยให้พันธุ์เป็น %s",
-                 if (r$method == "one-stage") "ขั้นตอนเดียว (one-stage)" else "สองขั้นตอน (two-stage)", i$Environments[1], i$Genotypes[1],
+  g <- col_lab("met", "geno", "พันธุ์"); e <- col_lab("met", "env", "สถานที่")
+  paste0(sprintf("วิเคราะห์ข้อมูลหลายสถานที่แบบ%s (%d %s, %d %s) โดยให้ %s เป็น %s",
+                 if (r$method == "one-stage") "ขั้นตอนเดียว (one-stage)" else "สองขั้นตอน (two-stage)", i$Environments[1], e, i$Genotypes[1], g, g,
                  if (isTRUE(r$random)) "random effect" else "fixed effect"),
-         if (nrow(ge)) sprintf(" ปฏิสัมพันธ์ระหว่างพันธุ์กับสถานที่%s (likelihood ratio test, p %s)", if (ge$P[1] < 0.05) "มีนัยสำคัญทางสถิติ" else "ไม่มีนัยสำคัญทางสถิติ",
+         if (nrow(ge)) sprintf(" ปฏิสัมพันธ์ระหว่าง %s กับ %s %s (likelihood ratio test, p %s)", g, e, if (ge$P[1] < 0.05) "มีนัยสำคัญทางสถิติ" else "ไม่มีนัยสำคัญทางสถิติ",
                                if (ge$P[1] < 0.0001) "< 0.0001" else paste("=", formatC(ge$P[1], format = "f", digits = 4))) else "",
          if (isTRUE(r$random)) sprintf(" ค่าอัตราพันธุกรรมรวมทุกสถานที่ = %s", paste(sprintf("%.2f", i$Heritability), collapse = ", ")) else
-           { g <- r$geno[which.max(r$geno$Mean), ]; sprintf(" พันธุ์ที่มีค่าเฉลี่ยรวมสูงสุดคือ %s (%s)", g$Genotype, fmt_n(g$Mean)) })
+           { best <- r$geno[which.max(r$geno$Mean), ]; sprintf(" %s ที่มีค่าเฉลี่ยรวมสูงสุดคือ %s (%s)", g, best$Genotype, fmt_n(best$Mean)) })
 }
 output$met_results <- renderUI({
   r <- rv$met; req(r)
-  ge <- if (!is.null(r$lrt)) r$lrt[!is.na(r$lrt$Chisq) & r$lrt$Test == "Genotype x Environment", ]
   gewide <- if (!is.null(r$genoenv)) { w <- stats::reshape(r$genoenv[r$genoenv$Trait == r$genoenv$Trait[1], c("Genotype", "Environment", "Mean")], idvar = "Genotype", timevar = "Environment", direction = "wide"); names(w) <- sub("^Mean[.]", "", names(w)); w }
   tagList(
-    key_stats(stat("Environments", r$info$Environments[1]), stat("Genotypes", r$info$Genotypes[1]),
-              if (isTRUE(r$random)) stat("Heritability", sprintf("%.2f", r$info$Heritability[1]), "across environments"),
-              if (NROW(ge)) stat("GxE interaction", fmt_p(ge$P[1]), "p-value, likelihood ratio test"),
-              if (!is.null(r$anova)) stat("GxE interaction", fmt_p(r$anova$`Pr(>F)`[r$anova$Source == "Genotype x Environment"][1]), "p-value, F test"),
-              if (!is.null(r$anova)) stat("CV (%)", sprintf("%.1f", r$info$`CV (%)`[1]), "coefficient of variation"),
-              stat("Method", r$method, if (!is.null(r$info$Weight)) paste("weights:", r$info$Weight[1]))),
     if (identical(r$info$Weight[1], "1/SE^2")) note_box("With weights 1/SE², the variance components and SE follow lme4 1.x; PBTools 1.1 (old lme4) printed them on another scale. The means agree. See the Methods page."),
     result_card("สรุปผล (ภาษาไทย)", p(lang = "th", met_thai(r)), copy = "cp_met_th", copy_label = "คัดลอก"),
     result_card("Descriptive statistics", html_table(fmt_df(r$descriptive)), copy = "cp_met_desc",
@@ -147,16 +141,18 @@ output$dl_met_doc <- downloadHandler("pbtools_multi_environment_report.doc", fun
 
 # Thai summary of the combined ANOVA, one paragraph per trait
 met_anova_thai <- function(r) {
+  gl <- col_lab("met", "geno", "พันธุ์"); el <- col_lab("met", "env", "สถานที่")
   sig <- function(p) if (p < 0.01) "มีนัยสำคัญยิ่ง (p < 0.01)" else if (p < 0.05) "มีนัยสำคัญ (p < 0.05)" else sprintf("ไม่มีนัยสำคัญ (p = %.3f)", p)
   paste(vapply(unique(r$anova$Trait), function(t) {
     x <- r$anova[r$anova$Trait == t, ]; ii <- r$info[r$info$Trait == t, ]; bb <- r$bartlett[r$bartlett$Trait == t, ]; g <- r$geno[r$geno$Trait == t, ]
     pg <- x$`Pr(>F)`[x$Source == "Genotype"]; pge <- x$`Pr(>F)`[x$Source == "Genotype x Environment"]
-    paste0(sprintf("%s: วิเคราะห์ความแปรปรวนร่วม %d สถานที่ %d พันธุ์ (สถานที่เป็น %s) ความแตกต่างระหว่างพันธุ์%s ปฏิสัมพันธ์พันธุ์ × สถานที่%s",
-                   t, ii$Environments, ii$Genotypes, if (isTRUE(r$env_random)) "random ทดสอบพันธุ์ด้วย MS ของ G×E" else "fixed ทดสอบด้วย pooled error", sig(pg), sig(pge)),
+    paste0(sprintf("%s: วิเคราะห์ความแปรปรวนร่วม %d %s, %d %s (%s เป็น %s) ความแตกต่างระหว่าง %s %s ปฏิสัมพันธ์ %s × %s %s",
+                   t, ii$Environments, el, ii$Genotypes, gl, el, if (isTRUE(r$env_random)) paste("random ทดสอบ", gl, "ด้วย MS ของ G×E") else "fixed ทดสอบด้วย pooled error",
+                   gl, sig(pg), gl, el, sig(pge)),
            if (pge < 0.05) " จึงควรดูผลรายสถานที่ หรือวิเคราะห์ความเสถียร (เมนู GxE & stability)" else "",
-           sprintf(" CV = %.1f%% LSD (5%%) ของค่าเฉลี่ยพันธุ์ = %s พันธุ์ที่มีค่าเฉลี่ยรวมสูงสุดคือ %s (%s)", ii$`CV (%)`, fmt_n(ii$`LSD (5%)`), g$Genotype[which.max(g$Mean)], fmt_n(max(g$Mean))),
-           if (bb$P < 0.05) sprintf(" ข้อควรระวัง: ความแปรปรวนของความคลาดเคลื่อนแต่ละสถานที่ไม่เท่ากัน (Bartlett p %s, MS ใหญ่สุด/เล็กสุด = %.1f) การรวมข้อมูลด้วย ANOVA จึงอาจไม่เหมาะสม ควรพิจารณาวิธี one-stage หรือ two-stage แบบถ่วงน้ำหนัก",
-                                    if (bb$P < 0.0001) "< 0.0001" else sprintf("= %.4f", bb$P), bb$`Largest / smallest error MS`)
-           else " ความแปรปรวนของความคลาดเคลื่อนแต่ละสถานที่ไม่แตกต่างกัน (Bartlett test) จึงรวมข้อมูลวิเคราะห์ได้")
+           sprintf(" CV = %.1f%% LSD (5%%) ของค่าเฉลี่ย %s = %s %s ที่มีค่าเฉลี่ยรวมสูงสุดคือ %s (%s)", ii$`CV (%)`, gl, fmt_n(ii$`LSD (5%)`), gl, g$Genotype[which.max(g$Mean)], fmt_n(max(g$Mean))),
+           if (bb$P < 0.05) sprintf(" ข้อควรระวัง: ความแปรปรวนของความคลาดเคลื่อนแต่ละ %s ไม่เท่ากัน (Bartlett p %s, MS ใหญ่สุด/เล็กสุด = %.1f) การรวมข้อมูลด้วย ANOVA จึงอาจไม่เหมาะสม ควรพิจารณาวิธี one-stage หรือ two-stage แบบถ่วงน้ำหนัก",
+                                    el, if (bb$P < 0.0001) "< 0.0001" else sprintf("= %.4f", bb$P), bb$`Largest / smallest error MS`)
+           else sprintf(" ความแปรปรวนของความคลาดเคลื่อนแต่ละ %s ไม่แตกต่างกัน (Bartlett test) จึงรวมข้อมูลวิเคราะห์ได้", el))
   }, ""), collapse = " ")
 }
