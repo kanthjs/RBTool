@@ -14,5 +14,4 @@ ok(all(table(d$Env, d$Rep, d$Row, d$Col) == 1), "Row-column: one plot per row x 
 e1 <- d[d$Env == "E1", ]; r1 <- e1[e1$Rep == 1, ]; r2 <- e1[e1$Rep == 2, ]
 meet <- function(by1, by2) all(table(r1[[by1]][match(r2$Geno, r1$Geno)], r2[[by2]]) == 1)
 ok(meet("Row", "Row") && meet("Col", "Row") && meet("Row", "Col") && meet("Col", "Col"), "Row-column: rows and columns of replicate 2 cross those of replicate 1 once")
-d <- rd("stage1_means.csv"); ok(all(table(d$Genotype, d$Env) == 1), "Stage-1 means: one mean per genotype and site")
 if (bad) quit(status = 1)

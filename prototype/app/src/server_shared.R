@@ -62,21 +62,39 @@ pw_server <- function(p, res_fn, geno_fn) {
                   method = if (isTRUE(input[[paste0(p, "_pw_exact")]])) "multcomp" else "emmeans")))
     pw(r$res); pw_err(r$err)
   })
+  # one trait / environment at a time: the comparisons are made within each model, so tables of all models together
+  # read as if letters could be compared across environments
+  key_id <- paste0(p, "_pw_key")
+  pw_keys <- reactive({ x <- pw(); unique(c(x$letters$Model, x$table$Model, x$stats$Model)) })
+  output[[paste0(p, "_pw_pick")]] <- renderUI({
+    k <- pw_keys(); if (length(k) < 2) return(NULL)
+    div(class = "d-flex align-items-end gap-3 flex-wrap mb-2",
+      selectInput(key_id, "Trait | environment", c(k, "All (one long table)" = "__all__"), width = "320px"),
+      p(class = "text-muted small mb-3", "Means are compared within one trait and environment only; letters of different environments are not comparable."))
+  })
+  pick <- function(df) {
+    k <- input[[key_id]]; keys <- pw_keys()
+    if (is.null(df) || length(keys) < 2 || identical(k, "__all__")) return(df)
+    if (is.null(k) || !k %in% keys) k <- keys[1]
+    df <- df[df$Model == k, , drop = FALSE]; df$Model <- NULL; df
+  }
   output[[paste0(p, "_pw_out")]] <- renderUI({
     r <- res_fn()
     if (is.null(r)) return(run_hint("the Run button in the sidebar"))
     if (isTRUE(r$random)) return(note_box("The last analysis had genotype random. Mean comparisons need genotype fixed: choose Fixed in step \"Genotype effect\" and run again."))
     if (!is.null(pw_err())) return(error_box(pw_err()))
     x <- pw(); if (is.null(x)) return(p(class = "text-muted", "Choose the comparison and press Compare means."))
-    if (isTRUE(x$classic)) return(tagList(
-      result_card(sprintf("Letter groups (%s, alpha = %s)", if (x$type == "DMRT") "Duncan's multiple range test" else "Fisher's LSD", x$alpha), html_table(fmt_df(x$letters)),
+    picker <- uiOutput(paste0(p, "_pw_pick"))
+    if (isTRUE(x$classic)) return(tagList(picker,
+      result_card(sprintf("Letter groups (%s, alpha = %s)", if (x$type == "DMRT") "Duncan's multiple range test" else "Fisher's LSD", x$alpha), html_table(fmt_df(pick(x$letters))),
         p(class = "text-muted small mb-0", "Genotypes sharing a letter do not differ significantly (agricolae::", if (x$type == "DMRT") "duncan.test" else "LSD.test", "), sorted by mean.")),
-      result_card("Error term and critical values", html_table(fmt_df(x$stats)))))
-    tab <- x$table; if (!isTRUE(input[[paste0(p, "_pw_all")]])) tab <- tab[tab$Significant, ]
+      result_card("Error term and critical values", html_table(fmt_df(pick(x$stats))))))
+    tab <- pick(x$table); if (!isTRUE(input[[paste0(p, "_pw_all")]])) tab <- tab[tab$Significant, ]
     tab$Significant <- ifelse(tab$Significant, "*", "")
     tagList(
+      picker,
       if (length(x$warning)) note_box(paste(x$warning, collapse = "; ")),
-      if (!is.null(x$letters)) result_card("Letter groups (Tukey)", html_table(fmt_df(x$letters)),
+      if (!is.null(x$letters)) result_card("Letter groups (Tukey)", html_table(fmt_df(pick(x$letters))),
         p(class = "text-muted small mb-0", "Genotypes sharing a letter do not differ significantly at the chosen level (multcomp::cld). PBTools does not print letters.")),
       result_card(sprintf("%s comparisons, simultaneous %d%% confidence intervals", x$type, round(100 * (1 - x$alpha))),
         if (!nrow(tab)) p("No pair differs significantly.") else html_table(fmt_df(tab))))
@@ -129,11 +147,10 @@ live_server <- function(p, plot_fn) {
     function(file) save_plot(styled_plot(p, plot_fn), file, export_dims(p), as.numeric(input[[paste0(p, "_dpi")]] %||% 300), plot_scale(p)))
 }
 
-# template data files offered next to the upload boxes (the met link gives the file of means when that is chosen)
+# template data files offered next to the upload boxes
 for (pg in names(template_file)) local({
   pg <- pg
   output[[paste0("tpl_", pg)]] <- downloadHandler(
-    function() { f <- template_file[[pg]]; if (pg == "met" && identical(input$met_method, "two") && identical(input$met_s1, "file")) f <- "stage1_means.csv"; paste0("rbtool_template_", f) },
-    function(file) { f <- template_file[[pg]]; if (pg == "met" && identical(input$met_method, "two") && identical(input$met_s1, "file")) f <- "stage1_means.csv"
-      file.copy(file.path("examples", f), file) })
+    function() paste0("rbtool_template_", template_file[[pg]]),
+    function(file) file.copy(file.path("examples", template_file[[pg]]), file))
 })

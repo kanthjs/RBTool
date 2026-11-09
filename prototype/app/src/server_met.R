@@ -4,38 +4,26 @@ met_dat <- data_server(input, "met")
 observeEvent(input$met_example, {
   e <- examples[[input$met_example]]
   if (!is.null(e$design)) updateRadioButtons(session, "met_design", selected = e$design)
-  if (identical(input$met_example, "stage1")) { updateRadioButtons(session, "met_method", selected = "two"); updateRadioButtons(session, "met_s1", selected = "file") }
-  else if (identical(input$met_s1, "file")) updateRadioButtons(session, "met_s1", selected = "calc")
 })
-met_file_mode <- reactive(input$met_method == "two" && identical(input$met_s1, "file"))
+# anova, one (one-stage) or two (two-stage, the stage-1 means computed here from the plot data)
+met_mode <- reactive(if (!identical(input$met_method, "mixed")) "anova" else if (identical(input$met_stage, "two")) "two" else "one")
 
 # what the pickers depend on; a reactiveVal does not invalidate when set to the same value, so switching between
 # combined ANOVA and one-stage keeps the variables already chosen
 met_vars_mode <- reactiveVal(NULL)
-observe({ req(input$met_method); met_vars_mode(list(file = met_file_mode(), design = input$met_design, multi = input$met_method != "two")) })
+observe({ req(input$met_method); met_vars_mode(list(design = input$met_design, multi = met_mode() != "two")) })
 output$met_vars <- renderUI({
   dat <- met_dat(); mode <- met_vars_mode(); req(mode)
-  if (mode$file) {
-    d <- dat$d; cl <- names(d); e <- dat$ex; num <- numeric_like(d)
-    tagList(role_select("met_s1geno", "Genotype", cl, e$geno, "gen|entry|line"),
-            role_select("met_s1env", "Environment", cl, e$env, "^env|site|loc"),
-            role_select("met_s1mean", "Stage-1 mean", num, e$trait, "mean"),
-            role_select("met_s1se", "SE of the mean (for weights)", num, e$se, "stderr|_se|^se", optional = TRUE),
-            role_select("met_s1err", "Error variance of the site", num, e$error_var, "sigma2|error|var"),
-            role_select("met_s1reps", "Number of replicates", num, e$reps, "rep"))
-  } else raw_vars_ui("met", dat, mode$design, multi_trait = mode$multi, need_env = TRUE)
+  raw_vars_ui("met", dat, mode$design, multi_trait = mode$multi, need_env = TRUE)
 })
 
 observeEvent(input$go_met, {
   d <- met_dat()$d; random <- input$met_random == "random"; s1 <- NULL
-  r <- run_safe(withProgress(message = if (input$met_method == "anova") "Computing the combined analysis of variance" else "Fitting the mixed models", value = 0.4, {
-    if (input$met_method == "anova") {
+  r <- run_safe(withProgress(message = if (met_mode() == "anova") "Computing the combined analysis of variance" else "Fitting the mixed models", value = 0.4, {
+    if (met_mode() == "anova") {
       pb_combined_anova(d, input$met_trait, input$met_geno, input$met_env, input$met_block, env_random = !identical(input$met_env_random, "fixed"))
-    } else if (input$met_method == "one") {
+    } else if (met_mode() == "one") {
       pb_one_stage(d, input$met_trait, input$met_geno, input$met_env, input$met_design, input$met_block, input$met_col, input$met_rep, random)
-    } else if (met_file_mode()) {
-      x <- pb_two_stage(d, input$met_s1mean, input$met_s1se, input$met_s1err, input$met_s1reps, input$met_s1geno, input$met_s1env, input$met_weight, random)
-      x$stage1 <- d; x$geno_col <- input$met_s1geno; x
     } else {
       s1 <- pb_stage1(d, input$met_trait[1], input$met_geno, input$met_design, input$met_block, input$met_col, input$met_rep, input$met_env)
       x <- pb_two_stage(s1, weight = input$met_weight, random = random)
@@ -55,8 +43,9 @@ met_thai <- function(r) {
   paste0(sprintf("วิเคราะห์ข้อมูลหลายสถานที่แบบ%s (%d %s, %d %s) โดยให้ %s เป็น %s",
                  if (r$method == "one-stage") "ขั้นตอนเดียว (one-stage)" else "สองขั้นตอน (two-stage)", i$Environments[1], e, i$Genotypes[1], g, g,
                  if (isTRUE(r$random)) "random effect" else "fixed effect"),
-         if (nrow(ge)) sprintf(" ปฏิสัมพันธ์ระหว่าง %s กับ %s %s (likelihood ratio test, p %s)", g, e, if (ge$P[1] < 0.05) "มีนัยสำคัญทางสถิติ" else "ไม่มีนัยสำคัญทางสถิติ",
+         if (NROW(ge)) sprintf(" ปฏิสัมพันธ์ระหว่าง %s กับ %s %s (likelihood ratio test, p %s)", g, e, if (ge$P[1] < 0.05) "มีนัยสำคัญทางสถิติ" else "ไม่มีนัยสำคัญทางสถิติ",
                                if (ge$P[1] < 0.0001) "< 0.0001" else paste("=", formatC(ge$P[1], format = "f", digits = 4))) else "",
+         if (isTRUE(r$random) && identical(i$Weight[1], "1/SE^2")) " ไม่รายงานอัตราพันธุกรรม เพราะการถ่วงน้ำหนัก 1/SE² ทำให้ค่านี้ขึ้นกับหน่วยของข้อมูล" else
          if (isTRUE(r$random)) sprintf(" ค่าอัตราพันธุกรรมรวมทุกสถานที่ = %s", paste(sprintf("%.2f", i$Heritability), collapse = ", ")) else
            { best <- r$geno[which.max(r$geno$Mean), ]; sprintf(" %s ที่มีค่าเฉลี่ยรวมสูงสุดคือ %s (%s)", g, best$Genotype, fmt_n(best$Mean)) })
 }
@@ -65,6 +54,10 @@ output$met_results <- renderUI({
   gewide <- if (!is.null(r$genoenv)) { w <- stats::reshape(r$genoenv[r$genoenv$Trait == r$genoenv$Trait[1], c("Genotype", "Environment", "Mean")], idvar = "Genotype", timevar = "Environment", direction = "wide"); names(w) <- sub("^Mean[.]", "", names(w)); w }
   tagList(
     if (identical(r$info$Weight[1], "1/SE^2")) note_box("With weights 1/SE², the variance components and SE follow lme4 1.x; PBTools 1.1 (old lme4) printed them on another scale. The means agree. See the Methods page."),
+    if (identical(r$info$Weight[1], "1/SE^2") && isTRUE(r$random)) div(class = "alert alert-warning small", lang = "th", icon("triangle-exclamation"),
+      strong(" ไม่ควรใช้ค่าอัตราพันธุกรรม (H²) ของการวิเคราะห์นี้: "),
+      "two-stage แบบถ่วงน้ำหนัก 1/SE² กำหนดความแปรปรวนของ G×E เป็น 1 ตามที่ PBTools ทำ ค่า H² จึงขึ้นกับหน่วยของข้อมูล (เช่น kg/ha ให้ H² เกือบ 1) ",
+      "ค่า BLUP และการจัดอันดับพันธุ์ใช้ได้ตามปกติ ถ้าต้องการ H² ใช้ one-stage หรือ two-stage แบบไม่ถ่วงน้ำหนัก"),
     result_card("สรุปผล (ภาษาไทย)", p(lang = "th", met_thai(r)), copy = "cp_met_th", copy_label = "คัดลอก"),
     result_card("Descriptive statistics", html_table(fmt_df(r$descriptive)), copy = "cp_met_desc",
       p(class = "text-muted small mb-0", if (r$method %in% c("one-stage", "combined ANOVA")) "Plot data of all environments together, as PBTools (DescriptiveStatistics)."
@@ -103,7 +96,7 @@ met_plot_obj <- reactive({
   }
   if (input$met_plot_type %in% c("ge", "heat")) {
     ge <- if (!is.null(r$genoenv)) r$genoenv[r$genoenv$Trait == r$genoenv$Trait[1], ] else {
-      s <- r$stage1; g <- met_geno_col(); en <- if (met_file_mode()) input$met_s1env else "Env"; mn <- if (met_file_mode()) input$met_s1mean else "Mean"
+      s <- r$stage1; g <- met_geno_col(); en <- "Env"; mn <- "Mean"
       data.frame(Genotype = s[[g]], Environment = s[[en]], Mean = pb_num(s[[mn]])) }
     if (identical(input$met_plot_type, "heat")) return(ge_heatmap(ge, "Genotype x environment means", if (!is.null(r$geno$Trait)) r$geno$Trait[1] else "Mean"))
     em <- tapply(ge$Mean, ge$Environment, mean); ge$Environment <- factor(ge$Environment, levels = names(sort(em)))

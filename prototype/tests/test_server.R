@@ -34,6 +34,11 @@ testServer(app, {
   session$setInputs(sea_pw_type = "Tukey", sea_pw_alpha = "0.05", sea_pw_all = FALSE, sea_pw_control = character())
   go("go_sea_pw")
   check(grepl("Letter groups", html(output$sea_pw_out)) && grepl("Tukey comparisons", html(output$sea_pw_out)), "Tukey: letters and significant pairs")
+  check(grepl("sea_pw_key", html(output$sea_pw_pick)) && !grepl("Yield | E2", html(output$sea_pw_out), fixed = TRUE), "Tukey: one environment shown at a time")
+  session$setInputs(sea_pw_key = "__all__")
+  check(grepl("Yield | E2", html(output$sea_pw_out), fixed = TRUE), "Tukey: all environments on request")
+  session$setInputs(sea_pw_key = "Yield | E2")
+  check(grepl("GEN", html(output$sea_pw_out)) && !grepl("Yield | E1<", html(output$sea_pw_out), fixed = TRUE), "Tukey: environment E2 chosen")
   session$setInputs(sea_pw_type = "Dunnett", sea_pw_control = "GEN1"); go("go_sea_pw")
   check(grepl("Dunnett comparisons", html(output$sea_pw_out)), "Dunnett against GEN1")
   check(!is.null(output$sea_plot) && !is.null(output$sea_diag), "single env: plot and residual checks render")
@@ -55,20 +60,22 @@ testServer(app, {
   check(as.numeric(Sys.time() - t0, units = "secs") < 30, "single env 11 sites + Tukey (emmeans) in under 30 s")
 
   # ---- multi-environment ----
-  session$setInputs(met_src = "ex", met_example = "rcb11", met_design = "RCB", met_method = "one")
+  session$setInputs(met_src = "ex", met_example = "rcb11", met_design = "RCB", met_method = "mixed", met_stage = "one")
   go("go_met", met_trait = "Yield", met_geno = "Genotype", met_env = "Env", met_block = "Block", met_random = "random")
   check(is.null(rv$met_err) && !is.na(rv$met$info$Heritability), paste("one-stage random: heritability across sites", rv$met_err))
   check(grepl("Genotype x Environment", html(output$met_results)) && !grepl("key-stat", html(output$met_results)), "one-stage: GxE test in the results, no key-number cards")
   check(nrow(rv$met$descriptive) == 1 && rv$met$descriptive$`N non-missing` == 495 && grepl("Descriptive statistics", html(output$met_results)),
         "one-stage: descriptive statistics of all plots (n = 495)")
-  session$setInputs(met_method = "two", met_s1 = "calc", met_weight = "none")
+  session$setInputs(met_method = "mixed", met_stage = "two", met_weight = "none")
   go("go_met", met_random = "fixed")
   check(is.null(rv$met_err) && nrow(rv$met$stage1) == 165, paste("two-stage from plot data: 165 stage-1 means", rv$met_err))
+  check(grepl("สองขั้นตอน", html(output$met_results)), "two-stage fixed: results and Thai summary render (no GxE test)")
   session$setInputs(met_pw_type = "Tukey", met_pw_alpha = "0.05", met_pw_all = TRUE); go("go_met_pw")
   check(grepl("Tukey comparisons", html(output$met_pw_out)), "two-stage: Tukey comparison")
-  session$setInputs(met_example = "stage1", met_s1 = "file", met_weight = "stderr")
-  go("go_met", met_s1geno = "Genotype", met_s1env = "Env", met_s1mean = "Yield_Mean", met_s1se = "Yield_StdErrMean", met_s1err = "Yield_sigma2", met_s1reps = "Yield_No.rep", met_random = "random")
-  check(is.null(rv$met_err) && grepl("1/SE", html(output$met_results)), paste("two-stage from a file of means, weighted", rv$met_err))
+  session$setInputs(met_weight = "stderr")
+  go("go_met", met_random = "random")
+  check(is.null(rv$met_err) && grepl("1/SE", html(output$met_results)), paste("two-stage random, weighted 1/SE^2", rv$met_err))
+  check(grepl("ไม่ควรใช้ค่าอัตราพันธุกรรม", html(output$met_results)) && grepl("ไม่รายงานอัตราพันธุกรรม", html(output$met_results)), "two-stage weighted random: warning about H2")
   check(grepl("Multi-environment analysis", doc_text(output$dl_met_doc)), "multi-environment: Word report")
 
 
@@ -184,7 +191,7 @@ testServer(app, {
   session$setInputs(sea_src = "ex", sea_example = "rcb11", sea_method = "mixed", sea_random = "random", sea_plot_style = "vc")
   go("go_sea", sea_trait = "Yield", sea_geno = "Genotype", sea_env = "Env", sea_block = "Block")
   check(!is.null(output$sea_plot$src), "variance components (single environment)")
-  session$setInputs(met_src = "ex", met_example = "rcb11", met_method = "one", met_random = "random", met_plot_type = "vc")
+  session$setInputs(met_src = "ex", met_example = "rcb11", met_method = "mixed", met_stage = "one", met_random = "random", met_plot_type = "vc")
   go("go_met", met_trait = "Yield", met_geno = "Genotype", met_env = "Env", met_block = "Block")
   check(!is.null(output$met_plot$src), "variance components (one-stage)")
   # ---- more metan plots ----

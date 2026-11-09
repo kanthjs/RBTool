@@ -9,9 +9,7 @@ examples <- list(
   rowcol = list(label = "Row-column: 25 genotypes, 2 reps, 2 sites (simulated)", file = "rowcol_2env.csv", pages = character(0), # not offered: RCBD only for now
                 design = "RowCol", trait = "Y", geno = "Geno", env = "Env", block = "Row", column = "Col", rep = "Rep"),
   maize = list(label = "Maize: 13 hybrids x 4 environments, 3 reps, 15 traits (metan data_ge2)", file = "maize_ge2.csv", pages = "gxe",
-               trait = c("KW", "ED", "CD", "NKR", "PH"), geno = "GEN", env = "ENV", rep = "REP", lower = "PH"),
-  stage1 = list(label = "Stage-1 means: 15 genotypes x 10 sites (PBTools)", file = "stage1_means.csv", pages = "met",
-                trait = "Yield_Mean", geno = "Genotype", env = "Env", se = "Yield_StdErrMean", error_var = "Yield_sigma2", reps = "Yield_No.rep"))
+               trait = c("KW", "ED", "CD", "NKR", "PH"), geno = "GEN", env = "ENV", rep = "REP", lower = "PH"))
 examples_for <- function(page) { ex <- Filter(function(e) page %in% e$pages, examples); stats::setNames(names(ex), vapply(ex, `[[`, "", "label")) }
 
 file_input <- function(p) fileInput(paste0(p, "_file"), "Data file (.csv, .txt, .xlsx, .xls)", accept = c(".csv", ".txt", ".tsv", ".xlsx", ".xls"))
@@ -26,8 +24,6 @@ mini_table <- function(head, rows) tags$table(class = "layout-table",
 plot_layout <- mini_table(c("Env", "Rep", "Genotype", "Yield", "Height"), list(
   c("E1", "1", "G1", "3285.7", "95"), c("E1", "1", "G2", "3012.4", "101"), c("...", "...", "...", "...", "..."),
   c("E1", "3", "G15", "2870.0", "98"), c("E2", "1", "G1", "4120.5", "."), c("...", "...", "...", "...", "...")))
-means_layout <- mini_table(c("Env", "Genotype", "Yield_Mean", "Yield_SE", "Yield_sigma2", "Yield_No.rep"), list(
-  c("E1", "G1", "2999.97", "361.86", "392838.8", "3"), c("E1", "G2", "2190.43", "361.86", "392838.8", "3"), c("...", "...", "...", "...", "...", "...")))
 layout_rules <- function(...) tags$ul(class = "layout-rules",
   tags$li("แถวแรกเป็นชื่อคอลัมน์ ชื่อใดก็ได้ (เลือกคอลัมน์ให้ตรงบทบาทในขั้น Variables)"),
   ..., tags$li("ค่าที่หายไป: เว้นว่าง หรือใส่ NA หรือ ."),
@@ -42,12 +38,7 @@ layout_help <- function(page) {
         gxe = tagList(tags$li("ต้องมี: สถานที่ (Env), ซ้ำ (Rep), พันธุ์ และลักษณะที่วัด 1 คอลัมน์"),
                       tags$li("MTSI / MGIDI: ลักษณะตั้งแต่ 2 ลักษณะ คอลัมน์ละลักษณะ"),
                       tags$li(strong("ข้อมูลต้องครบ:"), " ทุกพันธุ์ปลูกในทุกสถานที่ และมีซ้ำ")))))
-  body <- if (page == "met") tagList(
-    conditionalPanel("!(input.met_method == 'two' && input.met_s1 == 'file')", plots),
-    conditionalPanel("input.met_method == 'two' && input.met_s1 == 'file'",
-      p(class = "mb-1", "ตัวอย่างโครงสร้างข้อมูล (ค่าเฉลี่ยของแต่ละสถานที่ จากการวิเคราะห์ขั้นที่ 1):"), means_layout,
-      layout_rules(tags$li("หนึ่งแถว = หนึ่งพันธุ์ในหนึ่งสถานที่: ค่าเฉลี่ย และ SE ของค่าเฉลี่ย"),
-                   tags$li("error variance (sigma2) และจำนวนซ้ำ ใช้เมื่อเลือกถ่วงน้ำหนัก; ไม่มีก็ได้")))) else plots
+  body <- plots
   tags$details(class = "help-box layout-help", open = NA, tags$summary(icon("table"), " โครงสร้างไฟล์ข้อมูล"),
     div(class = "help-body", body, downloadLink(paste0("tpl_", page), tagList(icon("download"), " ดาวน์โหลดไฟล์ตัวอย่าง (.csv) ไปใช้เป็นแม่แบบ"))))
 }

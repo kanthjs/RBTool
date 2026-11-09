@@ -7,7 +7,6 @@ w <- function(d, f) utils::write.csv(d, file.path(out, f), row.names = FALSE)
 # stage-1 means of 15 genotypes x 10 sites
 w(read.csv("reference/data/RCB_ME.csv"), "rcb_11sites.csv")
 w(read.csv("reference/pbtools-port/inst/extdata/RCB_Multi.csv"), "rcb_2sites.csv")
-w(read.csv("reference/pbtools-port/inst/extdata/Two_stage.csv"), "stage1_means.csv")
 
 # Row-column design, simulated: 25 genotypes in a 5 x 5 layout, 2 replicates, 2 sites. Replicate 1 places genotype
 # (a, b) at row a, column b; replicate 2 at the cell with r + c = a and r + 2c = b (mod 5), two orthogonal latin

@@ -36,27 +36,6 @@ design_help <- help_box(
     " alpha-lattice or row-column designs whose blocks (rows) run across replicates; in the latinized row-column design the row numbers continue from one replicate to the next."
   )
 )
-effect_radio <- function(id) {
-  radioButtons(
-    id,
-    NULL,
-    c(
-      "Fixed: BLUEs (means) and mean comparison" = "fixed",
-      "Random: BLUPs and heritability" = "random"
-    )
-  )
-}
-effect_help <- help_box(
-  "Fixed or random?",
-  p(
-    strong("Fixed:"),
-    " the genotypes are the ones you want to compare (released varieties, selected lines). Gives adjusted means (BLUEs) with SE, and Tukey or Dunnett comparisons."
-  ),
-  p(
-    strong("Random:"),
-    " the genotypes stand for a population (a breeding population, a set of new lines). Gives predicted values (BLUPs), the genetic variance and the heritability."
-  )
-)
 downloads <- function(p) {
   conditionalPanel(
     sprintf("input.go_%s > 0", p),
@@ -141,33 +120,76 @@ pw_help <- help_box(
   )
 )
 
+# "What you get" box of each choice in step 1 of the single-environment screen: when to use it, what it gives,
+# what it does not give, and the question it answers
+get_box <- function(use, gets, not = NULL, answers) {
+  div(
+    class = "get-box",
+    lang = "th",
+    p(strong("ใช้เมื่อ: "), use),
+    p(strong("จะได้:")),
+    tags$ul(lapply(gets, tags$li)),
+    if (!is.null(not)) p(strong("ไม่ได้: "), not),
+    p(class = "get-q", icon("circle-question"), " ", answers)
+  )
+}
+sea_get_anova <- get_box(
+  "การทดลอง RCBD ที่ข้อมูลครบหรือเกือบครบ และต้องการตาราง ANOVA แบบดั้งเดิม (ตามตำรา Gomez & Gomez)",
+  list(
+    "ตาราง ANOVA และ F test ว่าพันธุ์ต่างกันไหม",
+    "ค่าเฉลี่ยพันธุ์ ± SE, CV และ LSD",
+    "แท็บ Mean comparison: Tukey, Dunnett (เทียบพันธุ์มาตรฐาน), LSD, DMRT"
+  ),
+  "ความแปรปรวนทางพันธุกรรมและอัตราพันธุกรรม (เลือก Mixed model แบบ Random)",
+  "พันธุ์ไหนให้ผลดีกว่ากันในการทดลองนี้"
+)
+sea_get_fixed <- get_box(
+  "พันธุ์ในการทดลองคือพันธุ์ที่คุณต้องการเปรียบเทียบเอง (พันธุ์รับรอง สายพันธุ์ที่คัดแล้ว) หรือมีแปลงหาย",
+  list(
+    "ค่าเฉลี่ยปรับแล้ว (BLUE) ± SE และ SED",
+    "แท็บ Mean comparison: Tukey (ทุกคู่) หรือ Dunnett (เทียบกับพันธุ์มาตรฐาน)"
+  ),
+  "ความแปรปรวนทางพันธุกรรมและอัตราพันธุกรรม (เลือก Random)",
+  "พันธุ์ไหนดีที่สุด และพันธุ์ใหม่ดีกว่าพันธุ์มาตรฐานไหม"
+)
+sea_get_random <- get_box(
+  "พันธุ์เป็นตัวแทนของประชากรที่กำลังคัดเลือก (ลูกผสม สายพันธุ์รุ่นแรก ๆ)",
+  list(
+    "ความแปรปรวนทางพันธุกรรม (σ²g) และความคลาดเคลื่อน (σ²e) พร้อม likelihood ratio test ว่า σ²g มีนัยสำคัญไหม",
+    "อัตราพันธุกรรม (H²): สูง (> 0.6) คัดเลือกจากค่าที่วัดได้มีแนวโน้มได้ผล; ต่ำ (< 0.3) ควรเพิ่มซ้ำหรือสถานที่ก่อนคัด",
+    "ค่าทำนาย (BLUP) ใช้จัดอันดับเพื่อคัดเลือก: ค่าถูกหดเข้าหาค่าเฉลี่ย ลดโอกาสคัดพันธุ์ที่ดูดีเพราะบังเอิญ"
+  ),
+  "การเปรียบเทียบค่าเฉลี่ย (Tukey, Dunnett) ค่า H² จากสถานที่เดียวรวมปฏิสัมพันธ์พันธุ์ × สถานที่ไว้ จึงมักสูงกว่าค่าที่ใช้ได้ทั่วไป",
+  "ลักษณะนี้ปรับปรุงด้วยการคัดเลือกได้ไหม และควรคัดพันธุ์ไหน"
+)
+
 sea_ui <- sidebarLayout(
   sidebarPanel(
     side_step(
       1,
-      "Method",
+      "Analysis",
       radioButtons(
         "sea_method",
-        NULL,
+        "Method",
         c(
           "Standard ANOVA (fixed blocks, F test, LSD, CV)" = "anova",
-          "Mixed model (lme4)" = "mixed"
+          "Mixed model (lme4, as PBTools)" = "mixed"
         )
       ),
-      help_box(
-        "Which method?",
-        p(
-          strong("Standard ANOVA:"),
-          " the classic analysis of variance of an RCBD, y = block + genotype + error, with blocks and genotypes fixed (stats::lm and anova). Gives the ANOVA table with the F test of genotypes, the coefficient of variation (CV) and the LSD; means can be compared with Tukey, Dunnett, LSD or DMRT."
-        ),
-        p(
-          strong("Mixed model:"),
-          " blocks random, fitted by REML as PBTools does. Genotype can be fixed (BLUEs) or random (BLUPs and heritability)."
-        ),
-        p(
-          "With complete data (every genotype in every block) both methods give the same genotype means and the same F test of genotypes; they differ when plots are missing."
+      conditionalPanel(
+        "input.sea_method == 'mixed'",
+        radioButtons(
+          "sea_random",
+          "Genotype effect",
+          c(
+            "Fixed: compare the genotypes (BLUEs)" = "fixed",
+            "Random: genetic variance and heritability (BLUPs)" = "random"
+          )
         )
-      )
+      ),
+      conditionalPanel("input.sea_method == 'anova'", sea_get_anova),
+      conditionalPanel("input.sea_method == 'mixed' && input.sea_random == 'fixed'", sea_get_fixed),
+      conditionalPanel("input.sea_method == 'mixed' && input.sea_random == 'random'", sea_get_random)
     ),
     side_step(
       2,
@@ -204,10 +226,6 @@ sea_ui <- sidebarLayout(
       )
     ),
     side_step(4, "Variables", uiOutput("sea_vars")),
-    conditionalPanel(
-      "input.sea_method != 'anova'",
-      side_step(5, "Genotype effect", effect_radio("sea_random"), effect_help)
-    ),
     run_bar("go_sea", "Run single-environment analysis")
   ),
   mainPanel(
@@ -288,18 +306,50 @@ sea_ui <- sidebarLayout(
   )
 )
 
+met_get_anova <- get_box(
+  "ข้อมูลครบ (ทุกพันธุ์ในทุกบล็อกของทุกสถานที่) และต้องการตาราง ANOVA รวมแบบดั้งเดิม (Gomez & Gomez)",
+  list(
+    "ตาราง ANOVA รวม: สถานที่, ซ้ำภายในสถานที่, พันธุ์ และพันธุ์ × สถานที่ (G×E) พร้อม F test, CV และ LSD",
+    "Bartlett's test ว่าความคลาดเคลื่อนของแต่ละสถานที่เท่ากันไหม (ถ้าไม่เท่า การรวมวิเคราะห์ต้องระวัง)",
+    "ค่าเฉลี่ยพันธุ์รวมทุกสถานที่ และแท็บ Mean comparison: Tukey, Dunnett, LSD, DMRT",
+    "สถานที่เป็น Random: ทดสอบพันธุ์กับ G×E (ผลใช้กับพื้นที่เป้าหมายได้); Fixed: ทดสอบกับความคลาดเคลื่อนรวม (ผลใช้กับสถานที่เหล่านี้เท่านั้น)"
+  ),
+  "ความแปรปรวนทางพันธุกรรมและอัตราพันธุกรรม (เลือก Mixed model แบบ Random)",
+  "พันธุ์ไหนดีเมื่อรวมทุกสถานที่ และพันธุ์ตอบสนองต่างกันตามสถานที่ไหม"
+)
+met_get_fixed <- get_box(
+  "พันธุ์ในการทดลองคือพันธุ์ที่คุณต้องการเปรียบเทียบเอง หรือข้อมูลไม่ครบ (แปลงหาย บางพันธุ์ไม่ได้ปลูกบางที่)",
+  list(
+    "ค่าเฉลี่ยปรับแล้วรวมทุกสถานที่ (BLUE) ± SE",
+    "แท็บ Mean comparison: Tukey (ทุกคู่) หรือ Dunnett (เทียบกับพันธุ์มาตรฐาน)",
+    "One-stage: ทดสอบ G×E (likelihood ratio test) และความแปรปรวนของ G×E; Two-stage ไม่มีการทดสอบ G×E"
+  ),
+  "อัตราพันธุกรรม (เลือก Random)",
+  "พันธุ์ไหนดีที่สุดโดยเฉลี่ยทุกสถานที่"
+)
+met_get_random <- get_box(
+  "พันธุ์เป็นตัวแทนของประชากรที่กำลังคัดเลือก และสถานที่เป็นตัวแทนของพื้นที่เป้าหมาย",
+  list(
+    "ความแปรปรวนทางพันธุกรรม (σ²g), ของ G×E (σ²ge, One-stage) และความคลาดเคลื่อน (σ²e)",
+    "อัตราพันธุกรรมข้ามสถานที่ H² = σ²g / (σ²g + σ²ge/e + σ²e/re): แยก G×E ออกแล้ว จึงใช้ได้ทั่วไปกว่า H² ของสถานที่เดียว",
+    "ค่าทำนาย (BLUP) รวมทุกสถานที่ ใช้จัดอันดับเพื่อคัดเลือก",
+    "ถ้า σ²ge ใหญ่เทียบกับ σ²g: พันธุ์ตอบสนองต่างกันมากตามสถานที่ ดูต่อในหน้า GxE & stability"
+  ),
+  "การเปรียบเทียบค่าเฉลี่ย (Tukey, Dunnett)",
+  "ลักษณะนี้คัดเลือกได้ผลในพื้นที่เป้าหมายไหม และควรคัดพันธุ์ไหน"
+)
+
 met_ui <- sidebarLayout(
   sidebarPanel(
     side_step(
       1,
-      "Method",
+      "Analysis",
       radioButtons(
         "met_method",
-        NULL,
+        "Method",
         c(
           "Combined ANOVA (classic analysis of variance across sites)" = "anova",
-          "One-stage: all plots in one model" = "one",
-          "Two-stage: stage-1 means of each site" = "two"
+          "Mixed model (lme4, as PBTools)" = "mixed"
         )
       ),
       conditionalPanel(
@@ -314,62 +364,72 @@ met_ui <- sidebarLayout(
         )
       ),
       conditionalPanel(
-        "input.met_method == 'two'",
+        "input.met_method == 'mixed'",
         radioButtons(
-          "met_s1",
-          "Stage-1 means",
+          "met_random",
+          "Genotype effect",
           c(
-            "Computed here from the plot data" = "calc",
-            "From a file of means (Env, Genotype, Mean, SE, error variance, reps)" = "file"
+            "Fixed: compare the genotypes across sites (BLUEs)" = "fixed",
+            "Random: genetic variance and heritability across sites (BLUPs)" = "random"
           )
-        ),
-        radioButtons(
-          "met_weight",
-          "Weights",
-          c("None" = "none", "1 / SE² of the stage-1 means" = "stderr"),
-          inline = TRUE
         )
       ),
-      help_box(
-        "One or two stages?",
-        p(
-          strong("One-stage"),
-          " fits all plots of all sites together, with the blocks nested in sites; it uses all the information."
-        ),
-        p(
-          strong("Two-stage"),
-          " first analyses each site (stage 1, genotype fixed) and then combines the site means (stage 2). It is lighter and works when only the means of each site are available."
-        ),
-        p(
-          strong("Combined ANOVA"),
-          " is the classic analysis of variance of all sites together (Gomez & Gomez 1984): environment, replicates within environment, genotype and genotype x environment, with F tests, CV and LSD, and Bartlett's test of the homogeneity of the error variances of the sites. Best with complete data."
+      conditionalPanel("input.met_method == 'anova'", met_get_anova),
+      conditionalPanel("input.met_method == 'mixed' && input.met_random == 'fixed'", met_get_fixed),
+      conditionalPanel("input.met_method == 'mixed' && input.met_random == 'random'", met_get_random),
+      conditionalPanel(
+        "input.met_method == 'mixed'",
+        advanced_box(
+          title = " How the sites are combined",
+          radioButtons(
+            "met_stage",
+            "Model",
+            c(
+              "One model of all plots (one-stage)" = "one",
+              "Site means first, then combined (two-stage)" = "two"
+            )
+          ),
+          conditionalPanel(
+            "input.met_stage == 'two'",
+            radioButtons(
+              "met_weight",
+              "Weights of the site means",
+              c("1 / SE² (precise sites count more)" = "stderr", "None" = "none")
+            )
+          ),
+          div(
+            class = "small text-muted",
+            lang = "th",
+            p(
+              strong("One-stage"),
+              " (ค่าเริ่มต้น): ใส่ข้อมูลทุกแปลงจากทุกสถานที่ใน model เดียว ใช้ข้อมูลครบที่สุด และทดสอบ G×E ได้"
+            ),
+            p(
+              class = "mb-0",
+              strong("Two-stage"),
+              ": วิเคราะห์ทีละสถานที่ก่อน (BLUE และ SE) แล้วรวมค่าเฉลี่ย เร็วกว่า ใช้เมื่อมีสถานที่จำนวนมาก หรือความแม่นของแต่ละสถานที่ต่างกันมาก ทดสอบ G×E ไม่ได้ ถ่วงน้ำหนักด้วย 1/SE² ให้ผลใกล้ one-stage กว่า"
+            )
+          )
         )
       )
     ),
-    conditionalPanel(
-      "input.met_method != 'two' || input.met_s1 == 'calc'",
-      side_step(
-        2,
-        "Experimental design",
-        radioButtons(
-          "met_design",
-          NULL,
-          c("Randomized complete block (RCBD)" = "RCB")
-        ),
-        help_box(
-          "Design",
-          p(
-            "Randomized complete block design (RCBD) at every site: every genotype once in each block (replicate)."
-          )
+    side_step(
+      2,
+      "Experimental design",
+      radioButtons(
+        "met_design",
+        NULL,
+        c("Randomized complete block (RCBD)" = "RCB")
+      ),
+      help_box(
+        "Design",
+        p(
+          "Randomized complete block design (RCBD) at every site: every genotype once in each block (replicate)."
         )
       )
     ),
     data_step("met", "met", 3),
     side_step(4, "Variables", uiOutput("met_vars")),
-    conditionalPanel(
-      "input.met_method != 'anova'",
-      side_step(5, "Genotype effect", effect_radio("met_random"), effect_help)
-    ),
     run_bar("go_met", "Run multi-environment analysis")
   ),
   mainPanel(
@@ -621,11 +681,92 @@ gxe_plot_controls <- tagList(
   )
 )
 
+# "What you get" box of each analysis of the GxE & stability screen
+gxe_get <- list(
+  fw = get_box(
+    "อยากรู้ว่าพันธุ์ตอบสนองต่อสภาพแวดล้อมที่ดีขึ้นหรือแย่ลงอย่างไร (ควรมีอย่างน้อย 4–5 สถานที่)",
+    list(
+      "slope b ของแต่ละพันธุ์บนดัชนีสภาพแวดล้อม: b ≈ 1 ปรับตัวได้ทั่วไป, b > 1 ให้ผลดีในที่สภาพดี, b < 1 ทนสภาพแย่",
+      "กราฟเส้นถดถอยของแต่ละพันธุ์ และกราฟค่าเฉลี่ย vs. slope"
+    ),
+    "ความแม่นของการทำนาย (ใช้ Eberhart-Russell) และพันธุ์ไหนเหมาะกับที่ไหน (ใช้ GGE)",
+    "พันธุ์ไหนตอบสนองต่อสภาพแวดล้อมดี และพันธุ์ไหนทนสภาพแย่"
+  ),
+  er = get_box(
+    "อยากรู้ว่าพันธุ์ให้ผลสูงและคงที่ทุกสภาพแวดล้อมไหม (ควรมีอย่างน้อย 4–5 สถานที่)",
+    list(
+      "slope b: b ≈ 1 ปรับตัวทั่วไป, b > 1 เหมาะกับที่ดี, b < 1 ทนที่แย่",
+      "s²di: ทำนายผลของพันธุ์ได้แม่นแค่ไหน (ค่าใกล้ 0 ทำนายได้ดี)",
+      "ANOVA ของ joint regression และกราฟค่าเฉลี่ย vs. b แบ่งสี่ส่วน"
+    ),
+    "บอกว่าพันธุ์ไหนเหมาะกับที่ไหน (ใช้ GGE)",
+    "พันธุ์ไหนให้ผลสูงและคงที่ทุกสภาพแวดล้อม"
+  ),
+  shukla = get_box(
+    "อยากจัดอันดับความเสถียรของพันธุ์ด้วยค่าเดียว",
+    list(
+      "ความแปรปรวนความเสถียร (σ²i) ของแต่ละพันธุ์: ส่วนของ G×E ที่มาจากพันธุ์นั้น ค่าน้อยคือเสถียร พร้อม F test",
+      "ทั้งสูตรของ Shukla (1972) และแบบที่ PBTools ใช้ (nlme::gls)"
+    ),
+    "บอกทิศทางการตอบสนอง (ใช้ Finlay-Wilkinson หรือ Eberhart-Russell)",
+    "พันธุ์ไหนเสถียรที่สุด"
+  ),
+  stats = get_box(
+    "อยากเทียบหลายดัชนีความเสถียรพร้อมกัน หรือต้องรายงานดัชนีที่วารสารขอ",
+    list(
+      "ตารางเดียว: Wricke's ecovalence, Shukla, Eberhart-Russell, Annicchiarico, Lin & Binns superiority, ASV และ WAASB",
+      "อันดับของแต่ละพันธุ์ในแต่ละดัชนี"
+    ),
+    "คำตอบเดียวว่าพันธุ์ไหนดีที่สุด แต่ละดัชนีวัดความเสถียรต่างแบบกัน อันดับจึงไม่ตรงกันเสมอ",
+    "พันธุ์ไหนเสถียรเมื่อดูจากหลายดัชนี"
+  ),
+  ammi = get_box(
+    "อยากแยกและดูรูปแบบของ G×E (ควรมีอย่างน้อย 4–5 สถานที่)",
+    list(
+      "ANOVA ของ AMMI: แบ่ง G×E เป็น principal components (PC) พร้อม F test ว่า PC ไหนมีนัยสำคัญ",
+      "AMMI1 (ค่าเฉลี่ย vs. PC1) และ AMMI2 (PC1 vs. PC2) biplot: พันธุ์ใกล้จุดกำเนิดคือเสถียร พันธุ์กับสถานที่ที่อยู่ทางเดียวกันเข้ากันดี",
+      "ดัชนีความเสถียรจาก AMMI (เช่น ASV)"
+    ),
+    "แบ่งพื้นที่ (mega-environment) ได้ชัดเท่า GGE",
+    "G×E มีรูปแบบอย่างไร และพันธุ์ไหนเสถียร"
+  ),
+  gge = get_box(
+    "อยากแบ่งพื้นที่และเลือกพันธุ์เฉพาะพื้นที่ (ควรมีอย่างน้อย 4–5 สถานที่)",
+    list(
+      "Which-won-where: พันธุ์ที่ชนะในแต่ละกลุ่มสถานที่ (mega-environment)",
+      "Mean vs. stability และพันธุ์ในอุดมคติ: พันธุ์ที่ให้ผลสูงและเสถียร",
+      "Discriminativeness vs. representativeness: สถานที่ทดสอบไหนแยกพันธุ์ได้ดีและเป็นตัวแทนพื้นที่"
+    ),
+    "การทดสอบทางสถิติของ G×E (ใช้ AMMI หรือ Multi-environment)",
+    "พันธุ์ไหนชนะที่ไหน และควรแนะนำพันธุ์แยกตามพื้นที่ไหม"
+  ),
+  waasb = get_box(
+    "อยากจัดอันดับพันธุ์ด้วยผลผลิตและความเสถียรพร้อมกันในค่าเดียว",
+    list(
+      "WAASB: ความเสถียรจาก BLUP ของ G×E ใช้ทุก PC ไม่ใช่แค่ PC1–PC2 (ค่าน้อยคือเสถียร)",
+      "WAASBY: คะแนนรวมของผลผลิตและความเสถียร ปรับน้ำหนักได้ด้วยแถบเลื่อน (step 4) ผลเปลี่ยนทันที",
+      "ความแปรปรวนทางพันธุกรรมและอัตราพันธุกรรมจาก mixed model"
+    ),
+    "บอกว่าพันธุ์ไหนเหมาะกับที่ไหน (ใช้ GGE)",
+    "พันธุ์ไหนดีที่สุดเมื่อคิดทั้งผลผลิตและความเสถียร"
+  ),
+  mtsi = get_box(
+    "ต้องคัดพันธุ์จากหลายลักษณะพร้อมกัน (อย่างน้อย 2 ลักษณะ)",
+    list(
+      "พันธุ์ที่ถูกเลือกตามสัดส่วนที่กำหนด (selection intensity)",
+      "MTSI: ใช้ WAASBY ของแต่ละลักษณะ (ผลผลิตและความเสถียร); MGIDI: ใช้ BLUP หรือค่าเฉลี่ยของพันธุ์",
+      "จุดแข็งและจุดอ่อนของแต่ละพันธุ์ และ selection differential ของแต่ละลักษณะ"
+    ),
+    "ผลของลักษณะเดียว (ใช้วิธีอื่นในหน้านี้)",
+    "ควรคัดพันธุ์ไหนเมื่อต้องการหลายลักษณะดีพร้อมกัน"
+  )
+)
+
 gxe_ui <- sidebarLayout(
   sidebarPanel(
     side_step(
       1,
-      "Method",
+      "Analysis",
       grouped_radio(
         "gxe_kind",
         list(
@@ -642,8 +783,11 @@ gxe_ui <- sidebarLayout(
           )
         )
       ),
+      lapply(names(gxe_get), function(k) {
+        conditionalPanel(sprintf("input.gxe_kind == '%s'", k), gxe_get[[k]])
+      }),
       help_box(
-        "Which analysis?",
+        "How each analysis works",
         h6(class = "fw-bold mt-1", "Stability"),
         p(
           strong("Finlay-Wilkinson:"),

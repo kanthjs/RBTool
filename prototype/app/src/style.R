@@ -80,10 +80,16 @@ app_css <- css_fill(
     .steps { display: flex; gap: 16px; flex-wrap: wrap; margin: 8px 0 20px; } .step { flex: 1 1 200px; display: flex; gap: 10px; align-items: flex-start; }
     .step .num { flex: none; width: 28px; height: 28px; border-radius: 6px; background: #f2eaea; color: %1$s; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; }
     
-    /* Key Stats: sleek minimal data counters */
+    /* Data tab: every row in a scroll box */
     .data-scroll { max-height: 600px; overflow: auto; border: 1px solid #ede8e8; border-radius: 6px; }
     .data-scroll .table-responsive { overflow: visible; }
     .data-scroll thead th { position: sticky; top: 0; z-index: 2; --bs-table-bg: #fff; --bs-table-bg-state: #fff; background-color: #fff !important; box-shadow: inset 0 -1px 0 #ede8e8; }
+    /* what-you-get box under the choice of analysis */
+    .get-box { background: #fbf6f6; border-left: 3px solid #A61C1C; border-radius: 6px; padding: 8px 10px; margin-top: 4px; font-size: 12.5px; line-height: 1.5; }
+    .get-box p { margin: 0 0 4px; }
+    .get-box ul { margin: 0 0 6px; padding-left: 18px; }
+    .get-box li { margin-bottom: 2px; }
+    .get-box .get-q { margin: 6px 0 0; color: #A61C1C; font-weight: 500; }
 
     /* Result cards */
     .result-card { border-radius: 8px; border: 1px solid #ebe5e5; background: #fff; margin-bottom: 16px; box-shadow: none; }
