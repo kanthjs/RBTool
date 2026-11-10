@@ -31,7 +31,10 @@ for (f in sort(list.files(engine_dir, pattern = "[.]R$", full.names = TRUE))) {
 app_name <- "RBTool"
 app_maintainer <- "Kanthanawit Jaisong"
 # Feedback form; set RBTOOL_FEEDBACK_URL to use another form
-feedback_form_url <- Sys.getenv("RBTOOL_FEEDBACK_URL", "https://docs.google.com/forms/d/e/1FAIpQLSdDmLjXssZG49TLmOreuoG4x0kcZkHJnH5XVUq-RvMTfkz8IA/viewform")
+feedback_form_url <- Sys.getenv(
+  "RBTOOL_FEEDBACK_URL",
+  "https://docs.google.com/forms/d/e/1FAIpQLSdDmLjXssZG49TLmOreuoG4x0kcZkHJnH5XVUq-RvMTfkz8IA/viewform"
+)
 source("src/helpers.R", local = TRUE)
 source("src/style.R", local = TRUE) # brand colours and CSS (from RDstat)
 source("src/data.R", local = TRUE) # examples, data step, variable pickers
@@ -46,7 +49,7 @@ home_ui <- div(
     class = "hero",
     h2(icon("seedling"), " ", app_name),
     p(
-      "วิเคราะห์ข้อมูลการทดลองปรับปรุงพันธุ์พืช โดยมีโปรแกรม PBTools ของ IRRI เป็นแนวทาง อาศัย R package ต่าง ๆ ที่ได้รับการยอมรับ ใช้งานผ่านเบราว์เซอร์ได้ทันที"
+      "Rice Breeding Tool คือ Interactive Web application เพื่อวิเคราะห์ข้อมูลการทดลองปรับปรุงพันธุ์พืช โดยมีโปรแกรม PBTools ของ IRRI เป็นแนวทาง อาศัย R package ต่าง ๆ ที่ได้รับการยอมรับ ใช้งานผ่านเบราว์เซอร์ได้ทันที"
     )
   ),
   h4("ต้องการวิเคราะห์อะไร", class = "mt-0"),
