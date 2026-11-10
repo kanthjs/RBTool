@@ -787,7 +787,21 @@ about_ui <- div(
     )
   ),
   h4("ผู้ดูแล"),
-  p(app_maintainer),
+  p(
+    tags$a(
+      href = "https://kanthanawit.in.th/",
+      target = "_blank",
+      rel = "noopener noreferrer",
+      app_maintainer
+    ),
+    tags$span(class = "text-muted", " — "),
+    tags$a(
+      href = "https://kanthanawit.in.th/",
+      target = "_blank",
+      rel = "noopener noreferrer",
+      "https://kanthanawit.in.th/"
+    )
+  ),
   h4("ซอร์สโค้ด"),
   p(tags$a(
     href = "https://github.com/kanthjs/RBTool",
