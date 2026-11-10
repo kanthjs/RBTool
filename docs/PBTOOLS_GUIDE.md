@@ -83,7 +83,7 @@ AMMI ของ PBTools มาจากโค้ดของ agricolae ใช้ 
 - `pbtools-r-fork/`: ซอร์สจาก shingocat ในส่วนที่อยู่ในขอบเขตตรงกับตัวติดตั้ง ต่างกันแค่การปรับให้เข้ากับ lme4 รุ่นใหม่ ส่วนที่มีเพิ่มอีก 99 ฟังก์ชัน (`doSEA`, `doMEA`, contrast, QTL) เป็นรุ่นพัฒนาต่อที่ไม่ได้มากับ PBTools 1.1
 - `pbtools-port/` (แพ็กเกจ `PBToolsRD`): PBTools ที่ port มารันบน R 4.5 สร้างจาก `r-original` ใช้เป็น **ไม้บรรทัด** ต่างจากของเดิมเฉพาะ 5 ฟังก์ชันที่จงใจแก้ (ดู `PORTING.md`)
 - `original-outputs/`: ผลที่รันจาก PBTools บน R 2.15.1 จริง ใช้เทียบกับ port
-- `java-rbridge/`: decompile มาจาก `RJavaManager1.0.jar` ของ **STAR** ซึ่งเป็นรุ่นที่ใหม่กว่าตัวใน PBTools ทุกอย่างที่อยู่ใน jar ของ PBTools มีอยู่ในชุดนี้ครบ แต่มีของเกินมา ได้แก่ p-rep (`ssaTestPrep`), outlier detection, regression, augmented alpha/row-column, ตาราง F แบบ lmerTest และ contrast ห้ามถือว่าของที่เกินมาเป็นฟีเจอร์ของ PBTools 1.1
+- `java-rbridge/` (เก็บในเครื่องเท่านั้น ไม่ได้อยู่บน GitHub): decompile มาจาก `RJavaManager1.0.jar` ของ **STAR** ซึ่งเป็นรุ่นที่ใหม่กว่าตัวใน PBTools ทุกอย่างที่อยู่ใน jar ของ PBTools มีอยู่ในชุดนี้ครบ แต่มีของเกินมา ได้แก่ p-rep (`ssaTestPrep`), outlier detection, regression, augmented alpha/row-column, ตาราง F แบบ lmerTest และ contrast ห้ามถือว่าของที่เกินมาเป็นฟีเจอร์ของ PBTools 1.1
 
 ## 6. RBTool: โครงสร้าง ความครอบคลุม และการตรวจสอบ
 

@@ -14,7 +14,7 @@ Approach (user decision, 2026-11-03): like STAR -> RDstat (github.com/kanthjs/ST
 | `prototype/tests/test_server.R` | headless `testServer` test of the app (30 checks) |
 | `reference/r-original/` | 321 functions of the original PBTools 1.1, one `.R` per function (from `deparse`, comments lost) |
 | `reference/pbtools-r-fork/` | shingocat/PBTools source, a commented and slightly different version (GPL-2) |
-| `reference/java-rbridge/` | decompiled `RJavaManager1.0.jar` from **STAR** (a newer build than the one in PBTools 1.1, see "Provenance check"): the Java-to-R bridge (CFR 0.152, `reference/tools/`, git-ignored) |
+| `reference/java-rbridge/` | decompiled `RJavaManager1.0.jar` from **STAR** (a newer build than the one in PBTools 1.1, see "Provenance check"): the Java-to-R bridge (CFR 0.152, `reference/tools/`). **Kept locally only (git-ignored), not published.** |
 | `reference/original-outputs/` | output of the original on R 2.15.1 for the shared cases (`ssa`, `designs`, `ms`, `gxe`) |
 | `reference/pbtools-port/` | package `PBToolsRD`: the PBTools functions ported to R 4.5 (the yardstick) |
 | `reference/data/` | PBTools example data used by the scripts |

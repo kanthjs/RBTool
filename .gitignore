@@ -12,3 +12,9 @@ AMMI_PC_scores_*.csv
 GGE_PC_scores_*.csv
 # decompiler binary (download it again, see PORTING.md)
 reference/tools/*.jar
+# kept locally, not published: PBTools manual and decompiled Java (IRRI's, licence unclear),
+# development measurements, local launch settings
+User's Manual.pdf
+reference/java-rbridge/
+outputs/
+.claude/
