@@ -101,6 +101,25 @@ AMMI ของ PBTools มาจากโค้ดของ agricolae ใช้ 
 
 RBTool มีบางอย่างที่ PBTools ไม่มี ได้แก่ letter groups, ตารางดัชนีเสถียรภาพจาก metan, สรุปผลภาษาไทย และไฟล์ Excel/Word ให้ดาวน์โหลด
 
+### ตารางระบุวิธีการวิเคราะห์และฟังก์ชันที่เกี่ยวข้อง (Methods & Functions Reference)
+
+| วิธีการวิเคราะห์ (Method) | วัตถุประสงค์และการแปลผล | ฟังก์ชันแพ็กเกจ R (CRAN) | ฟังก์ชันใน RBTool Engine |
+|---|---|---|---|
+| **Standard ANOVA (RCBD)** | F-test, CV (%), LSD, ค่าเฉลี่ยดิบ สำหรับข้อมูลสมบูรณ์ | `stats::lm()`, `stats::anova()`, `emmeans::emmeans()`, `agricolae::LSD.test()`, `agricolae::duncan.test()` | `pb_sea(..., method = "anova")` |
+| **BLUE (Adjusted Means)** | ขจัดอิทธิพลของบล็อก/สภาพแวดล้อม เปรียบเทียบพันธุ์อย่างเป็นธรรมแม้ข้อมูลไม่สมดุล | `lme4::lmer()`, `emmeans::emmeans(..., lmer.df = "asymptotic")`, `stats::vcov()` (SED) | `pb_sea(..., method = "mixed", random = FALSE)` |
+| **BLUP (Genotype Random)** | ค่าทำนายศักยภาพพันธุกรรม มี Shrinkage effect เหมาะสำหรับคัดเลือกพันธุ์ | `lme4::lmer()`, `lme4::ranef()`, `lme4::fixef()`, `stats::anova(refit = FALSE)` (LRT) | `pb_sea(..., method = "mixed", random = TRUE)` |
+| **Heritability (H²)** | สัดส่วนความแปรปรวนจากพันธุกรรม (>0.6 สูง, 0.3-0.6 ปานกลาง, <0.3 ต่ำ) | `lme4::VarCorr()`, `pb_harmonic()` (และทางเลือก Cullis et al. 2006) | `pb_sea()`, `pb_one_stage()`, `pb_two_stage()` |
+| **Combined ANOVA** | ANOVA รวมหลายสถานที่ และทดสอบความเท่ากันของ Error variance | `stats::lm()`, `stats::anova()`, `stats::bartlett.test()` | `pb_one_stage(..., method = "combined ANOVA")` |
+| **One-Stage MET** | โมเดลผสมรวมทุกแปลงและสถานที่ ทดสอบ G×E ด้วย LRT และทำนายค่าเฉลี่ยรายสถานที่ | `lme4::lmer()`, `emmeans::emmeans()`, `stats::predict(re.form)` | `pb_one_stage(..., method = "mixed")` |
+| **Two-Stage MET** | วิเคราะห์ทีละสถานที่ (ขั้นที่ 1) แล้วรวมค่าเฉลี่ยถ่วงน้ำหนัก 1/SE² (ขั้นที่ 2) | `lme4::lmer()`, `emmeans::emmeans()` | `pb_stage1()`, `pb_two_stage()` |
+| **Finlay-Wilkinson & Eberhart-Russell** | ความชัน b₁ (การตอบสนองต่อสภาพแวดล้อม) และ s²di (เสถียรภาพ/ความแปรปรวนเบี่ยงเบน) | `metan::ge_reg()` | `pb_fw()`, `pb_er()` |
+| **Shukla's Stability Variance** | สัดส่วนความแปรปรวนจาก G×E แยกตามพันธุ์ (ค่าน้อย = เสถียรภาพสูง) | `metan::Shukla()`, `nlme::gls(..., weights = varIdent())` | `pb_shukla()` |
+| **AMMI Analysis & Biplot** | แยกมิติ G×E ด้วย SVD, Biplot AMMI1/AMMI2, ดัชนี ASV/ssiASV | `metan::performs_ammi()`, `metan::ammi_indexes()`, `metan::plot_scores()` | `pb_ammi()` |
+| **GGE Biplot** | วิเคราะห์ G+GE, แบ่ง Mega-environments (Which-won-where), พันธุ์ในอุดมคติ | `metan::gge()`, `metan::plot.gge()` | `pb_gge()` |
+| **WAASB & WAASBY** | เสถียรภาพยุคใหม่จาก BLUP ทุกแกน IPCA, ดัชนีคัดเลือกผลผลิต+เสถียรภาพพร้อมกัน | `metan::waasb()`, `metan::plot_scores()` | `server_gxe.R` (`waasb`) |
+| **MTSI & MGIDI** | คัดเลือกหลายลักษณะพร้อมกัน (Multi-trait selection) พร้อมบอกจุดแข็ง-จุดอ่อน | `metan::mtsi()`, `metan::mgidi()`, `metan::gmd()` | `server_gxe.R` (`mtsi`) |
+| **Mean Comparisons** | Tukey-Kramer, Dunnett เทียบพันธุ์ตรวจสอบ, ตัวอักษรจัดกลุ่ม | `emmeans::emmeans()`, `multcomp::glht()`, `multcompView::multcompLetters()` | `pb_pairwise()` |
+
 ห่วงโซ่การตรวจสอบมีสามขั้น
 
 1. port เทียบกับตัวจริง: `sh scripts/check_port.sh` 33 กรณี ถ้าจะสร้างผลอ้างอิงใหม่ด้วย `REGEN=1` ต้องมี R 2.15.1 ซึ่งมีเฉพาะเครื่องเดิม

@@ -142,7 +142,7 @@ met_anova_thai <- function(r) {
     paste0(sprintf("%s: วิเคราะห์ความแปรปรวนรวมหลายสถานที่ (combined ANOVA) %d %s, %d %s (%s เป็น %s) ความแตกต่างระหว่าง %s %s ปฏิสัมพันธ์ %s × %s %s",
                    t, ii$Environments, el, ii$Genotypes, gl, el, if (isTRUE(r$env_random)) paste("random ทดสอบ", gl, "ด้วย MS ของ G×E") else "fixed ทดสอบด้วย pooled error",
                    gl, sig(pg), gl, el, sig(pge)),
-           if (pge < 0.05) " จึงควรดูผลรายสถานที่ หรือวิเคราะห์ความเสถียร (เมนู GxE & stability)" else "",
+           if (pge < 0.05) " จึงควรดูผลรายสถานที่ หรือวิเคราะห์เสถียรภาพ (เมนู GxE & stability)" else "",
            sprintf(" CV = %.1f%% LSD (5%%) ของค่าเฉลี่ย %s = %s %s ที่มีค่าเฉลี่ยรวมสูงสุดคือ %s (%s)", ii$`CV (%)`, gl, fmt_n(ii$`LSD (5%)`), gl, g$Genotype[which.max(g$Mean)], fmt_n(max(g$Mean))),
            if (bb$P < 0.05) sprintf(" ข้อควรระวัง: ความแปรปรวนของความคลาดเคลื่อนแต่ละ %s ไม่เท่ากัน (Bartlett p %s, MS ใหญ่สุด/เล็กสุด = %.1f) การรวมข้อมูลด้วย ANOVA จึงอาจไม่เหมาะสม ควรพิจารณาวิธี one-stage หรือ two-stage แบบถ่วงน้ำหนัก",
                                     el, if (bb$P < 0.0001) "< 0.0001" else sprintf("= %.4f", bb$P), bb$`Largest / smallest error MS`)

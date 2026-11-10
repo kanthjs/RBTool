@@ -71,7 +71,7 @@ gxe_words <- function(x) {
 gxe_thai <- function(r) {
   x <- switch(r$kind,
   waasb = { t <- waasby_table(); e <- r$estimates; h <- e$Values[e$Parameters == "Heritability"]; p_ge <- r$lrt[["Pr(>Chisq)"]][3]
-    sprintf("WAASB/WAASBY ของ %s: น้ำหนักค่าเฉลี่ย %d%% และความเสถียร %d%% พันธุ์ที่ WAASBY สูงสุดคือ %s; คัดเลือก %d%% ได้ %s; พันธุ์ที่เสถียรที่สุด (WAASB ต่ำสุด) คือ %s; อัตราพันธุกรรมรวมทุกสถานที่ = %.2f%s",
+    sprintf("WAASB/WAASBY ของ %s: น้ำหนักค่าเฉลี่ย %d%% และเสถียรภาพ %d%% พันธุ์ที่ WAASBY สูงสุดคือ %s; คัดเลือก %d%% ได้ %s; พันธุ์ที่เสถียรที่สุด (WAASB ต่ำสุด) คือ %s; อัตราพันธุกรรมรวมทุกสถานที่ = %.2f%s",
             r$trait, input$wy_live %||% 50, 100 - (input$wy_live %||% 50), t$Genotype[1], input$si_live %||% 15, paste(t$Genotype[t$Selected == "yes"], collapse = ", "),
             t$Genotype[which.min(t$WAASB)], h, if (isTRUE(p_ge < 0.05)) " และปฏิสัมพันธ์ G×E มีนัยสำคัญ (LRT)" else "") },
   mtsi = sprintf("คัดเลือก %d%% จาก %d ลักษณะ (%s; ค่าต่ำดี: %s): MTSI เลือก %s%s",
@@ -87,7 +87,7 @@ gxe_thai <- function(r) {
          sprintf("Eberhart-Russell (alpha = %.2f): พันธุ์ที่เสถียร (slope ไม่ต่างจาก 1 และ s2di ไม่ต่างจาก 0) มี %d พันธุ์%s; ตอบสนองต่อสภาพแวดล้อมดีมากกว่าค่าเฉลี่ย (b1 > 1) %d พันธุ์, น้อยกว่าค่าเฉลี่ย (b1 < 1) %d พันธุ์; ค่า s2di ต่างจาก 0 (ทำนายผลได้ยาก) %d พันธุ์",
                  r$alpha, length(st), if (length(st)) paste0(" ได้แก่ ", paste(st[order(-t$Mean[match(st, t$Genotype)])], collapse = ", ")) else "",
                  sum(t$Response == "above average (b1 > 1)"), sum(t$Response == "below average (b1 < 1)"), sum(t$Predictable == "no (s2di > 0)")) },
-  shukla = { t <- r$table; sprintf("พันธุ์ที่เสถียรที่สุดตามค่า Shukla's stability variance (ค่าต่ำสุด) คือ %s และไม่เสถียรที่สุดคือ %s เมื่อพิจารณาทั้งผลผลิตและความเสถียร (ผลรวมลำดับของ Kang) พันธุ์ที่ดีที่สุดคือ %s",
+  shukla = { t <- r$table; sprintf("พันธุ์ที่เสถียรที่สุดตามค่า Shukla's stability variance (ค่าต่ำสุด) คือ %s และไม่เสถียรที่สุดคือ %s เมื่อพิจารณาทั้งผลผลิตและเสถียรภาพ (ผลรวมลำดับของ Kang) พันธุ์ที่ดีที่สุดคือ %s",
              t$Genotype[which.min(t$`Shukla variance`)], t$Genotype[which.max(t$`Shukla variance`)], t$Genotype[which.min(t$`Sum of ranks (Kang)`)]) },
   stats = { t <- r$table; sprintf("ค่าเฉลี่ยสูงสุด: %s; Wricke ecovalence ต่ำสุด (เสถียร): %s; Annicchiarico สูงสุด: %s", t$Genotype[which.max(t$Mean)], t$Genotype[which.min(t$`Wricke ecovalence`)], t$Genotype[which.max(t$`Annicchiarico Wi (%)`)]) },
   ammi = { a <- r$anova; pc <- a[grepl("^PC", a$Source), ]; sprintf("ปฏิสัมพันธ์ พันธุ์ × %s แยกได้ %d องค์ประกอบ PC1 และ PC2 อธิบายได้ %.1f%% และ %.1f%% ของผลรวมกำลังสองของปฏิสัมพันธ์", col_lab("gxe", "env", "สภาพแวดล้อม"), nrow(pc), pc$`% of GxE`[1], pc$`% of GxE`[2]) },

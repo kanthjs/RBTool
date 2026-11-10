@@ -19,7 +19,7 @@ ammi_reading <- function(r) {
   out <- list(
     `ภาพรวม (ANOVA ของ AMMI)` = c(
       sprintf("จากผลรวมกำลังสองของ สภาพแวดล้อม พันธุ์ และปฏิสัมพันธ์ สภาพแวดล้อมอธิบายได้ %s พันธุ์ %s และปฏิสัมพันธ์ G×E %s", pct(sh[1]), pct(sh[2]), pct(sh[3])),
-      sprintf("ปฏิสัมพันธ์ G×E %s (p %s)", if (isTRUE(p_ge < 0.05)) "มีนัยสำคัญ: พันธุ์ตอบสนองต่อสถานที่ต่างกัน จึงควรพิจารณาความเสถียรร่วมกับผลผลิต" else "ไม่มีนัยสำคัญ: เลือกพันธุ์จากค่าเฉลี่ยรวมได้",
+      sprintf("ปฏิสัมพันธ์ G×E %s (p %s)", if (isTRUE(p_ge < 0.05)) "มีนัยสำคัญ: พันธุ์ตอบสนองต่อสถานที่ต่างกัน จึงควรพิจารณาเสถียรภาพร่วมกับผลผลิต" else "ไม่มีนัยสำคัญ: เลือกพันธุ์จากค่าเฉลี่ยรวมได้",
               if (isTRUE(p_ge < 0.0001)) "< 0.0001" else sprintf("= %.4f", p_ge)),
       sprintf("แยกปฏิสัมพันธ์ได้ %d องค์ประกอบ มีนัยสำคัญ %d องค์ประกอบ; PC1 และ PC2 อธิบายได้ %s และ %s ของ G×E (รวม %s)%s", nrow(pcs), n_sig,
               pct(pcs$`% of GxE`[1]), pct(pcs$`% of GxE`[2]), pct(pcs$`Cumulative %`[2]),
@@ -37,9 +37,9 @@ ammi_reading <- function(r) {
       sprintf("สถานที่ที่อยู่ห่างจุดกำเนิดมากที่สุด (ทำให้เกิดปฏิสัมพันธ์มากที่สุด): %s", top(e$Name[order(-edist)], 3)),
       "พันธุ์ที่อยู่ในทิศทางเดียวกับสถานที่ใด (มุมแคบ) ปรับตัวเฉพาะกับสถานที่นั้น"))
   if (!is.null(r$asv)) { s <- r$asv
-    out$`ดัชนีความเสถียร (ASV, metan::ammi_indexes)` = c(
+    out$`ดัชนีเสถียรภาพ (ASV, metan::ammi_indexes)` = c(
       sprintf("AMMI stability value (ASV) ต่ำ = เสถียร: เสถียรที่สุด %s; เสถียรน้อยที่สุด %s", top(s$Genotype[order(s$ASV)], 3), top(s$Genotype[order(-s$ASV)], 2)),
-      sprintf("ดัชนีผลผลิต-ความเสถียร ssiASV (ผลรวมลำดับของผลผลิตและ ASV ค่าต่ำดี): พันธุ์ที่ดีที่สุด %s", top(s$Genotype[order(s$`Yield stability index (ssiASV)`, -s$Mean)], 3)))
+      sprintf("ดัชนีผลผลิต-เสถียรภาพ ssiASV (ผลรวมลำดับของผลผลิตและ ASV ค่าต่ำดี): พันธุ์ที่ดีที่สุด %s", top(s$Genotype[order(s$`Yield stability index (ssiASV)`, -s$Mean)], 3)))
   }
   out
 }
@@ -60,7 +60,7 @@ gge_reading <- function(r) {
     `ภาพรวม` = c(
       sprintf("PC1 และ PC2 อธิบายความผันแปรของ G + G×E ได้ %s และ %s รวม %s%s", pct(ex[1]), pct(ex[2]), pct(ex[1] + ex[2]),
               if (ex[1] + ex[2] < 60) ": ต่ำกว่า 60% ภาพ biplot แสดงข้อมูลได้ไม่ครบ ควรแปลผลด้วยความระมัดระวัง" else ": ภาพ biplot แทนข้อมูลได้ดี"),
-      sprintf("SVP = %s, scaling = %s; ข้อสรุปด้านล่างที่อิงผลคูณของพิกัด (ผู้ชนะ, ลำดับค่าเฉลี่ย) ไม่ขึ้นกับ SVP แต่ระยะห่างจากแกน (ความเสถียร) ควรอ่านกับ SVP = genotype และการประเมินสถานที่ควรอ่านกับ SVP = environment ตาม Yan & Kang (2003)", m$svp, m$scaling)),
+      sprintf("SVP = %s, scaling = %s; ข้อสรุปด้านล่างที่อิงผลคูณของพิกัด (ผู้ชนะ, ลำดับค่าเฉลี่ย) ไม่ขึ้นกับ SVP แต่ระยะห่างจากแกน (เสถียรภาพ) ควรอ่านกับ SVP = genotype และการประเมินสถานที่ควรอ่านกับ SVP = environment ตาม Yan & Kang (2003)", m$svp, m$scaling)),
     `3. Which-won-where (ใครชนะที่ไหน)` = c(
       sprintf("แบ่งสถานที่ได้ %d กลุ่ม (mega-environment) ตามพันธุ์ที่ชนะ:", length(mega)),
       vapply(names(mega), function(w) sprintf("%s ชนะใน %s", w, paste(mega[[w]], collapse = ", ")), ""),
@@ -99,8 +99,8 @@ waasb_reading <- function(r, t, wy) {
       sprintf("จตุภาค II (ค่าเฉลี่ยดีแต่ไม่เสถียร, เหมาะกับบางสถานที่) %d พันธุ์: %s", q[["II"]], if (length(ii)) paste(ii, collapse = ", ") else "ไม่มี"),
       sprintf("จตุภาค III (เสถียรแต่ค่าเฉลี่ยต่ำ) %d พันธุ์ และจตุภาค I (ไม่เสถียรและค่าเฉลี่ยต่ำ) %d พันธุ์", q[["III"]], q[["I"]])),
     `WAASBY` = c(
-      sprintf("ที่น้ำหนักค่าเฉลี่ย %d%% : ความเสถียร %d%% พันธุ์อันดับหนึ่งคือ %s และที่คัดเลือกได้คือ %s", wy, 100 - wy, t$Genotype[1], paste(t$Genotype[t$Selected == "yes"], collapse = ", ")),
-      "เลื่อนน้ำหนักในขั้น Selection เพื่อดูว่าลำดับพันธุ์เปลี่ยนอย่างไร: น้ำหนักค่าเฉลี่ยสูง (เช่น 65-80%) สำหรับพื้นที่ดี น้ำหนักความเสถียรสูง (เช่น 50%) สำหรับพื้นที่เสี่ยง"))
+      sprintf("ที่น้ำหนักค่าเฉลี่ย %d%% : เสถียรภาพ %d%% พันธุ์อันดับหนึ่งคือ %s และที่คัดเลือกได้คือ %s", wy, 100 - wy, t$Genotype[1], paste(t$Genotype[t$Selected == "yes"], collapse = ", ")),
+      "เลื่อนน้ำหนักในขั้น Selection เพื่อดูว่าลำดับพันธุ์เปลี่ยนอย่างไร: น้ำหนักค่าเฉลี่ยสูง (เช่น 65-80%) สำหรับพื้นที่ดี น้ำหนักเสถียรภาพสูง (เช่น 50%) สำหรับพื้นที่เสี่ยง"))
 }
 
 mtsi_reading <- function(r) {
@@ -108,9 +108,9 @@ mtsi_reading <- function(r) {
     vapply(seq_len(nrow(cf)), function(i) { v <- unlist(cf[i, -1]); sprintf("%s: จุดแข็งคือ %s (สัดส่วนน้อย = ใกล้อุดมคติ), จุดอ่อนคือ %s", cf[[1]][i], fa[which.min(v)], fa[which.max(v)]) }, "") }
   fa_traits <- function(dif) { dif <- as.data.frame(dif); vapply(split(dif$VAR, dif$Factor), paste, "", collapse = ", ") }
   out <- list(
-    `MTSI (ความเสถียรหลายลักษณะ จาก WAASBY)` = c(
+    `MTSI (เสถียรภาพหลายลักษณะ จาก WAASBY)` = c(
       sprintf("วิเคราะห์ปัจจัย (factor analysis) จัดลักษณะเป็นกลุ่ม: %s", paste(sprintf("%s = %s", names(fa_traits(r$mtsi_dif)), fa_traits(r$mtsi_dif)), collapse = "; ")),
-      sprintf("พันธุ์ที่ถูกคัดเลือก (%d%%): %s ค่า MTSI ต่ำ = ใกล้พันธุ์อุดมคติทั้งค่าเฉลี่ยและความเสถียร", r$si, paste(r$mtsi$sel_gen, collapse = ", ")),
+      sprintf("พันธุ์ที่ถูกคัดเลือก (%d%%): %s ค่า MTSI ต่ำ = ใกล้พันธุ์อุดมคติทั้งค่าเฉลี่ยและเสถียรภาพ", r$si, paste(r$mtsi$sel_gen, collapse = ", ")),
       { d <- as.data.frame(r$mtsi_dif); sprintf("ผลต่างการคัดเลือก (selection differential) ของค่าเฉลี่ย: %s", paste(sprintf("%s %+.1f%%", d$VAR, d$SDperc), collapse = ", ")) }))
   if (!is.null(r$mgidi)) out$`MGIDI (ระยะห่างจากพันธุ์อุดมคติ)` = c(
       sprintf("คำนวณจาก%s พันธุ์ที่ถูกคัดเลือก: %s", if (r$mgidi_on == "blup") " BLUP ของพันธุ์" else "ค่าเฉลี่ยพันธุ์", paste(r$mgidi$sel_gen, collapse = ", ")),
