@@ -112,15 +112,26 @@ export_dims <- function(p) {
 }
 # "Text and point size" (custom size only) enlarges everything by drawing on a smaller canvas of the same proportions
 plot_scale <- function(p) if (identical(input[[paste0(p, "_dim")]], "custom")) as.numeric(input[[paste0(p, "_scale")]] %||% 1) else 1
-save_plot <- function(g, file, wh, dpi = 300, scale = 1) {
-  if (!inherits(g, "ggplot")) {
-    w <- wh[1] / scale; h <- wh[2] / scale
-    switch(tools::file_ext(file), svg = grDevices::svg(file, width = w, height = h), pdf = grDevices::pdf(file, width = w, height = h),
-           grDevices::png(file, width = round(w * dpi * scale), height = round(h * dpi * scale), res = dpi * scale, bg = "white"))
-    on.exit(grDevices::dev.off()); print(g); return(invisible(file))
-  }
-  dev <- switch(tools::file_ext(file), svg = function(filename, width, height, ...) grDevices::svg(filename, width = width, height = height), tools::file_ext(file))
-  ggplot2::ggsave(file, g, device = dev, width = wh[1] / scale, height = wh[2] / scale, dpi = dpi * scale, units = "in", bg = "white")
+# Devices that also work in Shinylive (webR has no Cairo, so grDevices::png()/svg() fail there and the browser saves
+# Shiny's error page as .html): PNG through shiny::plotPNG (ragg when present), SVG through svglite, PDF through pdf().
+save_plot <- function(g, file, wh, dpi = 300, scale = 1, fmt = tools::file_ext(file)) {
+  w <- wh[1] / scale; h <- wh[2] / scale
+  draw <- function() print(g)
+  switch(fmt,
+    svg = {
+      svglite::svglite(file, width = w, height = h, bg = "white")
+      on.exit(grDevices::dev.off()); draw()
+    },
+    pdf = {
+      grDevices::pdf(file, width = w, height = h, bg = "white")
+      on.exit(grDevices::dev.off()); draw()
+    },
+    {
+      tmp <- shiny::plotPNG(draw, tempfile(fileext = ".png"), width = round(w * dpi * scale), height = round(h * dpi * scale),
+                            res = dpi * scale, bg = "white")
+      file.copy(tmp, file, overwrite = TRUE); unlink(tmp)
+    })
+  invisible(file)
 }
 # Live View (WYSIWYG): laid out at the downloaded size in inches, drawn at the resolution that fits the card on screen,
 # so text and points take the same share of the figure as in the file.
@@ -144,7 +155,8 @@ live_server <- function(p, plot_fn) {
   })
   output[[paste0("dl_", p, "_plot")]] <- downloadHandler(
     function() paste0("rbtool_", p, "_plot.", input[[paste0(p, "_fmt")]] %||% "png"),
-    function(file) save_plot(styled_plot(p, plot_fn), file, export_dims(p), as.numeric(input[[paste0(p, "_dpi")]] %||% 300), plot_scale(p)))
+    function(file) save_plot(styled_plot(p, plot_fn), file, export_dims(p), as.numeric(input[[paste0(p, "_dpi")]] %||% 300), plot_scale(p),
+                             fmt = input[[paste0(p, "_fmt")]] %||% "png"))
 }
 
 # template data files offered next to the upload boxes

@@ -16,6 +16,7 @@ if (FALSE) {
   readxl::read_excel
   writexl::write_xlsx
   ggplot2::ggplot
+  svglite::svglite
   jsonlite::base64_enc
   htmltools::htmlEscape
 }

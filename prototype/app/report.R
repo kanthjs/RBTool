@@ -55,8 +55,8 @@ settings_table <- function(set, data_name) {
 
 make_report <- function(file, title, data_name, settings, method, tables, plot = NULL, notes = NULL, pkgs = "lme4", diag = NULL) {
   pngs <- list()
-  if (!is.null(plot)) { f <- tempfile(fileext = ".png"); ggplot2::ggsave(f, plot, width = 7, height = 5, dpi = 150); pngs[["Plot"]] <- f }
-  if (is.function(diag)) { f <- tempfile(fileext = ".png"); grDevices::png(f, width = 1000, height = 800, res = 130); try(diag(), silent = TRUE); grDevices::dev.off(); pngs[["Residual checks"]] <- f }
+  if (!is.null(plot)) { f <- shiny::plotPNG(function() print(plot), tempfile(fileext = ".png"), width = 1050, height = 750, res = 150); pngs[["Plot"]] <- f }
+  if (is.function(diag)) { f <- shiny::plotPNG(function() try(diag(), silent = TRUE), tempfile(fileext = ".png"), width = 1000, height = 800, res = 130); pngs[["Residual checks"]] <- f }
   blocks <- list(
     w_p(sprintf("%s %s, %s. Data: %s", app_name, version_label(), format(Sys.time(), "%Y-%m-%d %H:%M"), data_name), "small"),
     w_h2("Settings"), word_table(settings_table(settings, data_name)),
