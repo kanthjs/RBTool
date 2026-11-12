@@ -165,4 +165,7 @@ for (pg in names(template_file)) local({
   output[[paste0("tpl_", pg)]] <- downloadHandler(
     function() paste0("rbtool_template_", template_file[[pg]]),
     function(file) file.copy(file.path("examples", template_file[[pg]]), file))
+  # the link sits in a collapsed <details>; opening it does not tell Shiny the link is visible, so a suspended link
+  # never got its URL and saved the app page (.html) instead of the CSV
+  outputOptions(output, paste0("tpl_", pg), suspendWhenHidden = FALSE)
 })
