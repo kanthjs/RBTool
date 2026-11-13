@@ -84,6 +84,34 @@ Shiny.addCustomMessageHandler('stale', function(msg) {
   el.classList.toggle('is-stale', msg.on);
   el.querySelectorAll('.stale-dim').forEach(function(x) { if (msg.on) x.setAttribute('inert', ''); else x.removeAttribute('inert'); });
 });"
+# Downloads: the file is fetched by the page and saved from memory, instead of letting the browser follow the link.
+# In the Shinylive site the link exists only inside the service worker; Chromium does not send links that carry the
+# download attribute (as Shiny's download buttons do) through it, so the click ended in "file not found".
+# If the fetch fails, the link is opened as before.
+download_js <- "
+document.addEventListener('click', function(ev) {
+  var a = ev.target.closest ? ev.target.closest('a.shiny-download-link') : null;
+  if (!a || ev.button !== 0) return;
+  ev.preventDefault();
+  var href = a.getAttribute('href');
+  if (!href || a.classList.contains('disabled') || a.dataset.busy) return;
+  a.dataset.busy = '1'; a.style.cursor = 'progress';
+  var done = function() { delete a.dataset.busy; a.style.cursor = ''; };
+  fetch(a.href).then(function(r) {
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    var m = /filename=\\\"?([^\\\";]+)/.exec(r.headers.get('content-disposition') || '');
+    return r.blob().then(function(b) {
+      var u = URL.createObjectURL(b), t = document.createElement('a');
+      t.href = u; t.download = m ? m[1] : (a.id || 'download');
+      document.body.appendChild(t); t.click(); document.body.removeChild(t);
+      setTimeout(function() { URL.revokeObjectURL(u); }, 60000); done();
+    });
+  }).catch(function(e) {
+    done();
+    if (window.Shiny && Shiny.notifications) Shiny.notifications.show({html: 'Download failed (' + e.message + '). Trying to open the file in a new tab.', type: 'error', duration: 6000});
+    window.open(a.href, '_blank');
+  });
+}, true);"
 copy_js <- "
 Shiny.addCustomMessageHandler('copy_text', function(msg) {
   var done = function(ok) { Shiny.setInputValue('copy_status', {ok: ok, what: msg.what, t: Date.now()}); };

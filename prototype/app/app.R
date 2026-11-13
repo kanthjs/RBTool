@@ -120,6 +120,7 @@ ui <- bslib::page_navbar(
     google_sans_link,
     tags$script(HTML(copy_js)),
     tags$script(HTML(stale_js)),
+    tags$script(HTML(download_js)),
     tags$style(HTML(app_css)),
     useBusyIndicators()
   ),
