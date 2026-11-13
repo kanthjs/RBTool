@@ -119,17 +119,30 @@ save_plot <- function(g, file, wh, dpi = 300, scale = 1, fmt = tools::file_ext(f
   draw <- function() print(g)
   switch(fmt,
     svg = {
-      svglite::svglite(file, width = w, height = h, bg = "white")
-      on.exit(grDevices::dev.off()); draw()
+      opened <- FALSE
+      if (requireNamespace("svglite", quietly = TRUE)) {
+        tryCatch({
+          svglite::svglite(file, width = w, height = h, bg = "white")
+          opened <- TRUE
+          draw()
+        }, error = function(e) {
+          if (opened) grDevices::dev.off()
+          opened <<- FALSE
+        })
+        if (opened) grDevices::dev.off()
+      }
+      if (!opened) {
+        grDevices::svg(file, width = w, height = h, bg = "white")
+        tryCatch(draw(), finally = grDevices::dev.off())
+      }
     },
     pdf = {
       grDevices::pdf(file, width = w, height = h, bg = "white")
-      on.exit(grDevices::dev.off()); draw()
+      tryCatch(draw(), finally = grDevices::dev.off())
     },
     {
-      tmp <- shiny::plotPNG(draw, tempfile(fileext = ".png"), width = round(w * dpi * scale), height = round(h * dpi * scale),
-                            res = dpi * scale, bg = "white")
-      file.copy(tmp, file, overwrite = TRUE); unlink(tmp)
+      shiny::plotPNG(draw, file, width = round(w * dpi * scale), height = round(h * dpi * scale),
+                     res = dpi * scale, bg = "white")
     })
   invisible(file)
 }

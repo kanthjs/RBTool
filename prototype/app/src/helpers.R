@@ -84,6 +84,19 @@ Shiny.addCustomMessageHandler('stale', function(msg) {
   el.classList.toggle('is-stale', msg.on);
   el.querySelectorAll('.stale-dim').forEach(function(x) { if (msg.on) x.setAttribute('inert', ''); else x.removeAttribute('inert'); });
 });"
+# Workaround for Chromium / Shinylive download issue: strip HTML5 download attribute
+# so that clicks route cleanly through the Service Worker when opened directly
+downloadButton <- function(...) {
+  tag <- shiny::downloadButton(...)
+  tag$attribs$download <- NULL
+  tag
+}
+downloadLink <- function(...) {
+  tag <- shiny::downloadLink(...)
+  tag$attribs$download <- NULL
+  tag
+}
+
 # Downloads: the file is fetched by the page and saved from memory, instead of letting the browser follow the link.
 # In the Shinylive site the link exists only inside the service worker; Chromium does not send links that carry the
 # download attribute (as Shiny's download buttons do) through it, so the click ended in "file not found".
@@ -97,12 +110,43 @@ document.addEventListener('click', function(ev) {
   if (!href || a.classList.contains('disabled') || a.dataset.busy) return;
   a.dataset.busy = '1'; a.style.cursor = 'progress';
   var done = function() { delete a.dataset.busy; a.style.cursor = ''; };
+
+  var getFilename = function(res) {
+    var cd = res ? (res.headers.get('content-disposition') || '') : '';
+    var m = /filename=\\\"?([^\\\";]+)/.exec(cd);
+    if (m && m[1]) return m[1].replace(/\\\"/g, '').trim();
+    var id = a.id || '';
+    var mPlot = /^dl_([a-z]+)_plot$/.exec(id);
+    if (mPlot) {
+      var p = mPlot[1];
+      var sel = document.getElementById(p + '_fmt');
+      var fmt = (sel && sel.value) ? sel.value : 'png';
+      return 'rbtool_' + p + '_plot.' + fmt;
+    }
+    if (id === 'dl_sea_xlsx') return 'pbtools_single_environment.xlsx';
+    if (id === 'dl_met_xlsx') return 'pbtools_multi_environment.xlsx';
+    if (id === 'dl_gxe_xlsx') return 'pbtools_gxe.xlsx';
+    if (id === 'dl_sea_doc') return 'pbtools_single_environment_report.doc';
+    if (id === 'dl_met_doc') return 'pbtools_multi_environment_report.doc';
+    if (id === 'dl_gxe_doc') return 'pbtools_gxe_report.doc';
+    if (id.indexOf('tpl_') === 0) {
+      var tpl = id.replace('tpl_', '');
+      var tplMap = { sea: 'rcb_2sites.csv', met: 'rcb_11sites.csv', gxe: 'rcb_11sites.csv' };
+      return 'rbtool_template_' + (tplMap[tpl] || (tpl + '.csv'));
+    }
+    var ct = res ? (res.headers.get('content-type') || '') : '';
+    if (ct.indexOf('image/png') !== -1) return (id || 'plot') + '.png';
+    if (ct.indexOf('image/svg') !== -1) return (id || 'plot') + '.svg';
+    if (ct.indexOf('application/pdf') !== -1) return (id || 'plot') + '.pdf';
+    return (id || 'download') + '.png';
+  };
+
   fetch(a.href).then(function(r) {
     if (!r.ok) throw new Error('HTTP ' + r.status);
-    var m = /filename=\\\"?([^\\\";]+)/.exec(r.headers.get('content-disposition') || '');
+    var filename = getFilename(r);
     return r.blob().then(function(b) {
       var u = URL.createObjectURL(b), t = document.createElement('a');
-      t.href = u; t.download = m ? m[1] : (a.id || 'download');
+      t.href = u; t.download = filename;
       document.body.appendChild(t); t.click(); document.body.removeChild(t);
       setTimeout(function() { URL.revokeObjectURL(u); }, 60000); done();
     });
