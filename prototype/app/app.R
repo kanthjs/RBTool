@@ -17,6 +17,7 @@ if (FALSE) {
   writexl::write_xlsx
   ggplot2::ggplot
   svglite::svglite
+  ragg::agg_png
   jsonlite::base64_enc
   htmltools::htmlEscape
 }

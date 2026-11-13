@@ -26,7 +26,7 @@ jobs:
       - name: Install packages
         # install.packages() only warns when a package fails, so check afterwards and stop with the names of the missing ones
         run: |
-          Rscript -e 'pk <- c("shiny", "bslib", "shinylive", "lme4", "emmeans", "multcomp", "multcompView", "nlme", "metan", "agricolae", "ggplot2", "svglite", "readxl", "writexl", "jsonlite", "htmltools")
+          Rscript -e 'pk <- c("shiny", "bslib", "shinylive", "lme4", "emmeans", "multcomp", "multcompView", "nlme", "metan", "agricolae", "ggplot2", "svglite", "ragg", "readxl", "writexl", "jsonlite", "htmltools")
             install.packages(pk)
             miss <- pk[!vapply(pk, requireNamespace, NA, quietly = TRUE)]
             if (length(miss)) stop("packages not installed: ", paste(miss, collapse = ", "))'
